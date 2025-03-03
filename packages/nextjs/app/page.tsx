@@ -1,71 +1,90 @@
 "use client";
 
-import Link from "next/link";
 import type { NextPage } from "next";
-import { useAccount } from "wagmi";
-import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { Address } from "~~/components/scaffold-eth";
+import Link from "next/link";
+import { RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
+import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 const Home: NextPage = () => {
-  const { address: connectedAddress } = useAccount();
+  const router = useRouter();
+
+  // Center of the map
+  const mapCenter = { lat: 3.2003, lng: 101.7118 }; // Setapak, Kuala Lumpur
+
+
+  // Sample pet locations
+  const petLocations = [
+    { id: 1, lat: 3.1965, lng: 101.7033, name: "Buddy" }, // Near TARC University College
+    { id: 2, lat: 3.2023, lng: 101.7175, name: "Husky Found" }, // Near Wangsa Maju LRT
+    { id: 3, lat: 3.2078, lng: 101.7290, name: "Shepherd Found" }, // Near Setapak Central Mall
+    { id: 4, lat: 3.2105, lng: 101.7181, name: "Luna" }, // Near Columbia Asia Hospital
+    { id: 5, lat: 3.1989, lng: 101.7132, name: "Milo" }, // Near Sri Utama International School
+    { id: 6, lat: 3.2054, lng: 101.7229, name: "Snowy" }, // Near PV128 Mall
+    { id: 7, lat: 3.1906, lng: 101.7057, name: "Rocky" }, // Near Melati Utama
+    { id: 8, lat: 3.1942, lng: 101.7091, name: "Shadow" }, // Near Festival City Mall (Setapak Central)
+    { id: 9, lat: 3.1998, lng: 101.7167, name: "Max" }, // Near Wangsa Walk Mall
+    { id: 10, lat: 3.2084, lng: 101.7250, name: "Bella" }, // Near Sri Rampai LRT
+  ];
+  
+  
+
+  // Handle marker click -> Navigate to Pet Description Page
+  const handleMarkerClick = (id: number) => {
+    router.push(`/petDescription?id=${id}`);
+  };
+
+  // Load Google Maps API correctly
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
+    });
+
+  if (!isLoaded) return <div>Loading Map...</div>;
 
   return (
-    <>
-      <div className="flex items-center flex-col flex-grow pt-10">
-        <div className="px-5">
-          <h1 className="text-center">
-            <span className="block text-2xl mb-2">Welcome to</span>
-            <span className="block text-4xl font-bold">Scaffold-ETH 2</span>
-          </h1>
-          <div className="flex justify-center items-center space-x-2 flex-col sm:flex-row">
-            <p className="my-2 font-medium">Connected Address:</p>
-            <Address address={connectedAddress} />
-          </div>
-
-          <p className="text-center text-lg">
-            Get started by editing{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/nextjs/app/page.tsx
-            </code>
-          </p>
-          <p className="text-center text-lg">
-            Edit your smart contract{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              YourContract.sol
-            </code>{" "}
-            in{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/hardhat/contracts
-            </code>
-          </p>
-        </div>
-
-        <div className="flex-grow bg-base-300 w-full mt-16 px-8 py-12">
-          <div className="flex justify-center items-center gap-12 flex-col sm:flex-row">
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <BugAntIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Tinker with your smart contract using the{" "}
-                <Link href="/debug" passHref className="link">
-                  Debug Contracts
-                </Link>{" "}
-                tab.
-              </p>
-            </div>
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <MagnifyingGlassIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Explore your local transactions with the{" "}
-                <Link href="/blockexplorer" passHref className="link">
-                  Block Explorer
-                </Link>{" "}
-                tab.
-              </p>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
+      {/* Wallet Connection Button */}
+      <div className="flex justify-end w-full mb-4">
+        <RainbowKitCustomConnectButton />
       </div>
-    </>
+
+      <h1 className="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-6">
+        Lost & Found Pet Locations
+      </h1>
+
+      {/* Google Maps Integration */}
+      <GoogleMap
+        mapContainerStyle={{ width: "100%", height: "400px" }}
+        center={mapCenter}
+        zoom={12}
+      >
+        {petLocations.map((pet) => (
+          <Marker
+            key={pet.id}
+            position={{ lat: pet.lat, lng: pet.lng }}
+            onLoad={(marker) => {
+              marker.addListener("click", () => handleMarkerClick(pet.id));
+            }}
+          />
+        ))}
+      </GoogleMap>
+
+      {/* Navigation Buttons */}
+      <div className="flex gap-4 mt-6">
+        <Link href="/petDescription">
+          <button className="px-6 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600">
+            Go to Pet Description Page
+          </button>
+        </Link>
+
+        <Link href="/upload">
+          <button className="px-6 py-2 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600">
+            Go to Upload Page
+          </button>
+        </Link>
+      </div>
+    </div>
   );
 };
 
