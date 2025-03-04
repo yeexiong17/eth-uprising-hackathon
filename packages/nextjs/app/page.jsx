@@ -39,11 +39,6 @@ const Home = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
-      {/* Wallet Connection Button */}
-      <div className="flex justify-end w-full mb-4">
-        <RainbowKitCustomConnectButton />
-      </div>
-
       <h1 className="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-6">
         Lost & Found Pet Locations
       </h1>

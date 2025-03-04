@@ -64,10 +64,6 @@ const PetDescription: NextPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8">
-      {/* Wallet Connection Button */}
-      <div className="flex justify-end mb-4">
-        <RainbowKitCustomConnectButton />
-      </div>
 
       <h1 className="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-6">
         Report Lost & Found Pets
