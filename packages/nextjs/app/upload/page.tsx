@@ -6,7 +6,7 @@ import { useAccount } from "wagmi";
 
 const UploadPage = () => {
   const router = useRouter();
-  const { address, isConnected, isConnecting, isReconnecting } = useAccount();
+  const { isConnected, isConnecting, isReconnecting } = useAccount();
   const [isAuthChecking, setIsAuthChecking] = useState(true);
   const [formData, setFormData] = useState({
     breed: "",

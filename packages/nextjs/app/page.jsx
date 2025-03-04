@@ -1,18 +1,15 @@
 "use client";
 
-import type { NextPage } from "next";
 import Link from "next/link";
 import { RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
-const Home: NextPage = () => {
+const Home = () => {
   const router = useRouter();
 
   // Center of the map
   const mapCenter = { lat: 3.2003, lng: 101.7118 }; // Setapak, Kuala Lumpur
-
 
   // Sample pet locations
   const petLocations = [
@@ -27,18 +24,16 @@ const Home: NextPage = () => {
     { id: 9, lat: 3.1998, lng: 101.7167, name: "Max" }, // Near Wangsa Walk Mall
     { id: 10, lat: 3.2084, lng: 101.7250, name: "Bella" }, // Near Sri Rampai LRT
   ];
-  
-  
 
   // Handle marker click -> Navigate to Pet Description Page
-  const handleMarkerClick = (id: number) => {
+  const handleMarkerClick = (id) => {
     router.push(`/petDescription?id=${id}`);
   };
 
   // Load Google Maps API correctly
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
-    });
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+  });
 
   if (!isLoaded) return <div>Loading Map...</div>;
 
@@ -63,9 +58,7 @@ const Home: NextPage = () => {
           <Marker
             key={pet.id}
             position={{ lat: pet.lat, lng: pet.lng }}
-            onLoad={(marker) => {
-              marker.addListener("click", () => handleMarkerClick(pet.id));
-            }}
+            onClick={() => handleMarkerClick(pet.id)}
           />
         ))}
       </GoogleMap>

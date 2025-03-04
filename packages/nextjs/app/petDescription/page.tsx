@@ -97,16 +97,16 @@ const PetDescription: NextPage = () => {
             <p className="text-gray-700">📍 Last Seen: Central Park, NY</p>
           </div>
           {/* "I Found My Dog" Button */}
-      {verifiedPets.length > 0 && (
-        <div className="flex justify-center mt-6">
-          <button
-            onClick={handleFoundMyDog}
-            className="px-6 py-3 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 transition"
-          >
-            I Found My Dog 🎉
-          </button>
-        </div>
-      )}
+          {verifiedPets.length > 0 && (
+            <div className="flex justify-center mt-6">
+              <button
+                onClick={handleFoundMyDog}
+                className="px-6 py-3 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 transition"
+              >
+                I Found My Dog 🎉
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -140,10 +140,9 @@ const PetDescription: NextPage = () => {
               onClick={() => handleVerify(pet.id)}
               disabled={verifiedPets.includes(pet.id)}
               className={`mt-4 md:mt-0 px-4 py-2 font-semibold rounded-md shadow-md transition 
-                ${
-                  verifiedPets.includes(pet.id)
-                    ? "bg-gray-400 text-white cursor-not-allowed"
-                    : "bg-blue-500 text-white hover:bg-blue-600"
+                ${verifiedPets.includes(pet.id)
+                  ? "bg-gray-400 text-white cursor-not-allowed"
+                  : "bg-blue-500 text-white hover:bg-blue-600"
                 }`}
             >
               {verifiedPets.includes(pet.id) ? "Verified ✅" : "Verify"}
@@ -151,8 +150,6 @@ const PetDescription: NextPage = () => {
           </div>
         ))}
       </div>
-
-      
 
       {/* Success Modal */}
       {modalOpen && (
