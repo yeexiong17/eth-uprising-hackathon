@@ -3,11 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAccount } from "wagmi";
+import { AuthGuard } from "~~/components/AuthGuard";
 
 const UploadPage = () => {
-  const router = useRouter();
-  const { isConnected, isConnecting, isReconnecting } = useAccount();
-  const [isAuthChecking, setIsAuthChecking] = useState(true);
   const [formData, setFormData] = useState({
     breed: "",
     color: "",
@@ -16,19 +14,6 @@ const UploadPage = () => {
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
-  // Authentication check with proper loading state handling
-  useEffect(() => {
-    const checkAuth = () => {
-      if (!isConnecting && !isReconnecting) {
-        setIsAuthChecking(false);
-        if (!isConnected) {
-          router.push("/");
-        }
-      }
-    };
-    checkAuth();
-  }, [isConnecting, isReconnecting, isConnected, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -62,23 +47,6 @@ const UploadPage = () => {
       }
     };
   }, [previewUrl]);
-
-  // Show loading state while checking authentication
-  if (isAuthChecking || isConnecting || isReconnecting) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-pulse text-center">
-          <div className="text-lg mb-2">Checking authentication...</div>
-          <div className="text-sm opacity-60">Please wait</div>
-        </div>
-      </div>
-    );
-  }
-
-  // If not authenticated after checking, don't render the page content
-  if (!isConnected) {
-    return null;
-  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -209,4 +177,12 @@ const UploadPage = () => {
   );
 };
 
-export default UploadPage;
+const ProtectedUploadPage = () => {
+  return (
+    <AuthGuard requireAuth={true}>
+      <UploadPage />
+    </AuthGuard>
+  );
+};
+
+export default ProtectedUploadPage;

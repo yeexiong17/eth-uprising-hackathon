@@ -2,6 +2,7 @@
 
 import type { NextPage } from "next";
 import { useState } from "react";
+import { AuthGuard } from "~~/components/AuthGuard";
 import { RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 
 const PetDescription: NextPage = () => {
@@ -180,4 +181,12 @@ const PetDescription: NextPage = () => {
   );
 };
 
-export default PetDescription;
+const ProtectedPetDescription = () => {
+  return (
+    <AuthGuard requireAuth={true}>
+      <PetDescription />
+    </AuthGuard>
+  );
+};
+
+export default ProtectedPetDescription;
