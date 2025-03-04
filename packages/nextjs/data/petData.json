@@ -1,0 +1,52 @@
+{
+    "pets": [
+        {
+            "id": 1,
+            "name": "Buddy",
+            "breed": "Golden Retriever",
+            "color": "Golden, Has a pet necklace",
+            "lastSeen": "TARC University College",
+            "image": "/2.avif",
+            "reporter": "0x123...abcd",
+            "latitude": 3.1965,
+            "longitude": 101.7033,
+            "status": "Lost"
+        },
+        {
+            "id": 2,
+            "name": "Husky Found",
+            "breed": "Siberian Husky",
+            "color": "Black & White",
+            "lastSeen": "Wangsa Maju LRT",
+            "image": "/3.webp",
+            "reporter": "0x456...efgh",
+            "latitude": 3.2023,
+            "longitude": 101.7175,
+            "status": "Found"
+        },
+        {
+            "id": 3,
+            "name": "Shepherd Found",
+            "breed": "German Shepherd",
+            "color": "Brown & Black",
+            "lastSeen": "Setapak Central Mall",
+            "image": "/4.avif",
+            "reporter": "0x789...ijkl",
+            "latitude": 3.2078,
+            "longitude": 101.7290,
+            "status": "Found"
+        },
+        {
+            "id": 4,
+            "name": "Luna",
+            "breed": "Unknown",
+            "color": "White",
+            "lastSeen": "Columbia Asia Hospital",
+            "image": "/5.avif",
+            "reporter": "0x321...wxyz",
+            "latitude": 3.2105,
+            "longitude": 101.7181,
+            "status": "Lost"
+        }
+    ]
+}

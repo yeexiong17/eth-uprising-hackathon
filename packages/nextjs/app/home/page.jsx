@@ -1,77 +1,197 @@
 "use client";
 
 import Link from "next/link";
-import { RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
-import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
+import Map, { Marker, Popup } from 'react-map-gl/mapbox';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import { useRouter } from "next/navigation";
 import { AuthGuard } from "~~/components/AuthGuard";
+import { useState } from 'react';
+import petData from "../../data/petData.json";
 
 const Home = () => {
     const router = useRouter();
-
-    // Center of the map
-    const mapCenter = { lat: 3.2003, lng: 101.7118 }; // Setapak, Kuala Lumpur
-
-    // Sample pet locations
-    const petLocations = [
-        { id: 1, lat: 3.1965, lng: 101.7033, name: "Buddy" }, // Near TARC University College
-        { id: 2, lat: 3.2023, lng: 101.7175, name: "Husky Found" }, // Near Wangsa Maju LRT
-        { id: 3, lat: 3.2078, lng: 101.7290, name: "Shepherd Found" }, // Near Setapak Central Mall
-        { id: 4, lat: 3.2105, lng: 101.7181, name: "Luna" }, // Near Columbia Asia Hospital
-        { id: 5, lat: 3.1989, lng: 101.7132, name: "Milo" }, // Near Sri Utama International School
-        { id: 6, lat: 3.2054, lng: 101.7229, name: "Snowy" }, // Near PV128 Mall
-        { id: 7, lat: 3.1906, lng: 101.7057, name: "Rocky" }, // Near Melati Utama
-        { id: 8, lat: 3.1942, lng: 101.7091, name: "Shadow" }, // Near Festival City Mall (Setapak Central)
-        { id: 9, lat: 3.1998, lng: 101.7167, name: "Max" }, // Near Wangsa Walk Mall
-        { id: 10, lat: 3.2084, lng: 101.7250, name: "Bella" }, // Near Sri Rampai LRT
-    ];
-
-    // Handle marker click -> Navigate to Pet Description Page
-    const handleMarkerClick = (id) => {
-        router.push(`/petDescription?id=${id}`);
-    };
-
-    // Load Google Maps API correctly
-    const { isLoaded } = useJsApiLoader({
-        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+    const [selectedPet, setSelectedPet] = useState(null);
+    const mapCenter = { latitude: 3.2003, longitude: 101.7118 };
+    const [viewState, setViewState] = useState({
+        ...mapCenter,
+        zoom: 11.5
     });
 
-    if (!isLoaded) return <div>Loading Map...</div>;
+    // Add this placeholder image URL
+    const placeholderImage = "https://placehold.co/400x300/e2e8f0/1e293b?text=Pet+Image";
+
+    const handleMarkerClick = (pet) => {
+        setSelectedPet(pet);
+        // Add a latitude offset to move the center point up
+        const latitudeOffset = -0.008; // Adjust this value to move more or less
+        setViewState({
+            latitude: pet.latitude + latitudeOffset,
+            longitude: pet.longitude,
+            zoom: 13,
+            transitionDuration: 500
+        });
+    };
 
     return (
-        <div className="flex flex-col items-center justify-center bg-gray-100 p-4">
-            <h1 className="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-6">
-                Lost & Found Pet Locations
-            </h1>
+        <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+            {/* Header Section */}
+            <div className="bg-white shadow-md py-6 md:py-8">
+                <div className="container mx-auto px-4">
+                    <h1 className="text-2xl md:text-4xl font-bold text-center text-gray-800 mb-3">
+                        Pet Location Tracker
+                    </h1>
+                    <div className="flex flex-wrap justify-center items-center gap-2 text-gray-600">
+                        <span className="flex items-center gap-1">
+                            <span className="text-lg">🔴</span> Lost Pets
+                        </span>
+                        <span className="hidden md:block mx-2">•</span>
+                        <span className="flex items-center gap-1">
+                            <span className="text-lg">🟢</span> Found Pets
+                        </span>
+                    </div>
+                </div>
+            </div>
 
-            {/* Google Maps Integration */}
-            <GoogleMap
-                mapContainerStyle={{ width: "100%", height: "400px" }}
-                center={mapCenter}
-                zoom={12}
-            >
-                {petLocations.map((pet) => (
-                    <Marker
-                        key={pet.id}
-                        position={{ lat: pet.lat, lng: pet.lng }}
-                        onClick={() => handleMarkerClick(pet.id)}
-                    />
-                ))}
-            </GoogleMap>
+            {/* Main Content */}
+            <div className="container mx-auto px-2 md:px-4 py-4 md:py-8">
+                {/* Map Section */}
+                <div className="bg-white rounded-xl shadow-lg p-3 md:p-6 mb-4 md:mb-8">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-3 md:mb-6 gap-2">
+                        <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
+                            Pet Locations Map
+                        </h2>
+                        <div className="text-xs md:text-sm text-gray-600 bg-gray-50 px-3 py-1.5 md:px-4 md:py-2 rounded-lg">
+                            Click on markers to view details
+                        </div>
+                    </div>
+                    {/* Adjust map height based on screen size */}
+                    <div className="h-[calc(100vh-280px)] md:h-[600px] rounded-xl overflow-hidden border border-gray-100">
+                        <Map
+                            {...viewState}
+                            onMove={evt => setViewState(evt.viewState)}
+                            style={{ width: "100%", height: "100%" }}
+                            mapStyle="mapbox://styles/mapbox/streets-v11"
+                            mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+                            onClick={() => {
+                                setSelectedPet(null);
+                                setViewState({
+                                    ...mapCenter,
+                                    zoom: 11.5,
+                                    transitionDuration: 500
+                                });
+                            }}
+                        >
+                            {petData.pets.map((pet) => (
+                                <Marker
+                                    key={pet.id}
+                                    latitude={pet.latitude}
+                                    longitude={pet.longitude}
+                                    onClick={(e) => {
+                                        e.originalEvent.stopPropagation();
+                                        handleMarkerClick(pet);
+                                    }}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    <div className="text-xl md:text-2xl transform hover:scale-110 transition-transform duration-200" title={pet.name}>
+                                        {pet.status === "Lost" ? "🔴" : "🟢"}
+                                    </div>
+                                </Marker>
+                            ))}
 
-            {/* Navigation Buttons */}
-            <div className="flex gap-4 mt-6">
-                <Link href="/petDescription">
-                    <button className="px-6 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600">
-                        Go to Pet Description Page
-                    </button>
-                </Link>
+                            {selectedPet && (
+                                <Popup
+                                    latitude={selectedPet.latitude}
+                                    longitude={selectedPet.longitude}
+                                    onClose={() => setSelectedPet(null)}
+                                    closeButton={true}
+                                    closeOnClick={true}
+                                    offset={25}
+                                    maxWidth="300px"
+                                >
+                                    <div className="p-2 w-full bg-white rounded-lg">
+                                        {/* Main Content - Horizontal Layout */}
+                                        <div className="flex gap-3">
+                                            {/* Left Side - Image */}
+                                            <div className="flex-shrink-0 w-20 h-20 md:w-24 md:h-24 rounded-lg overflow-hidden bg-gray-100">
+                                                <img
+                                                    src={selectedPet.image || placeholderImage}
+                                                    alt={`${selectedPet.name || 'Pet'} image`}
+                                                    className="w-full h-full object-cover"
+                                                    onError={(e) => {
+                                                        e.target.src = placeholderImage;
+                                                    }}
+                                                />
+                                            </div>
 
-                <Link href="/uploadLostPet">
-                    <button className="px-6 py-2 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600">
-                        Go to Upload Page
-                    </button>
-                </Link>
+                                            {/* Right Side - Details */}
+                                            <div className="flex-1 min-w-0">
+                                                {/* Status Badge */}
+                                                <div className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mb-1 ${selectedPet.status === "Lost"
+                                                    ? "bg-red-100 text-red-800"
+                                                    : "bg-green-100 text-green-800"
+                                                    }`}>
+                                                    {selectedPet.status}
+                                                </div>
+
+                                                {/* Pet Name */}
+                                                <h3 className="font-bold text-base text-gray-800 mb-1 truncate">
+                                                    {selectedPet.name}
+                                                </h3>
+
+                                                {/* Pet Details */}
+                                                <div className="space-y-0.5 text-xs text-gray-600">
+                                                    <p className="truncate">
+                                                        <span className="font-medium text-gray-700">Breed:</span>{' '}
+                                                        {selectedPet.breed}
+                                                    </p>
+                                                    <p className="truncate">
+                                                        <span className="font-medium text-gray-700">Color:</span>{' '}
+                                                        {selectedPet.color}
+                                                    </p>
+                                                    <p className="truncate">
+                                                        <span className="font-medium text-gray-700">Last Seen:</span>{' '}
+                                                        {selectedPet.lastSeen}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Action Button */}
+                                        <button
+                                            onClick={() => router.push(`/petDescription?id=${selectedPet.id}`)}
+                                            className="bg-blue-500 text-white px-2 py-1 rounded-lg text-xs hover:bg-blue-600 w-full mt-2 font-medium transition-all duration-200 hover:shadow-md"
+                                        >
+                                            View Full Details
+                                        </button>
+                                    </div>
+                                </Popup>
+                            )}
+                        </Map>
+                    </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
+                    <Link href="/petDescription" className="group">
+                        <div className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-md p-4 md:p-8 transition-all duration-200 transform group-hover:-translate-y-1">
+                            <h3 className="text-xl md:text-2xl font-semibold mb-2 md:mb-3">Browse Lost & Found Pets</h3>
+                            <p className="text-blue-100 text-xs md:text-sm">View detailed listings of all reported pets in your area</p>
+                            <div className="mt-3 md:mt-4 text-blue-200 group-hover:translate-x-2 transition-transform duration-200">
+                                →
+                            </div>
+                        </div>
+                    </Link>
+
+                    <Link href="/uploadLostPet" className="group">
+                        <div className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl shadow-md p-4 md:p-8 transition-all duration-200 transform group-hover:-translate-y-1">
+                            <h3 className="text-xl md:text-2xl font-semibold mb-2 md:mb-3">Report a Pet</h3>
+                            <p className="text-green-100 text-xs md:text-sm">Help reunite lost pets with their families</p>
+                            <div className="mt-3 md:mt-4 text-green-200 group-hover:translate-x-2 transition-transform duration-200">
+                                →
+                            </div>
+                        </div>
+                    </Link>
+                </div>
             </div>
         </div>
     );
