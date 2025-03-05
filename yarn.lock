@@ -3176,6 +3176,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@openzeppelin/contracts@npm:^5.2.0":
+  version: 5.2.0
+  resolution: "@openzeppelin/contracts@npm:5.2.0"
+  checksum: badff8c3be46b099c331e90ba27f75e36f7af681279952cf0b123c7448bc53cd541ef447de8e6ebc38e7b29aed8f17dacf0756aac5891eed03fe96a0a4eba1a0
+  languageName: node
+  linkType: hard
+
 "@paulmillr/qr@npm:^0.2.1":
   version: 0.2.1
   resolution: "@paulmillr/qr@npm:0.2.1"
@@ -14247,6 +14254,7 @@ __metadata:
   resolution: "se-2@workspace:."
   dependencies:
     "@mapbox/mapbox-gl-geocoder": ^5.0.3
+    "@openzeppelin/contracts": ^5.2.0
     "@react-google-maps/api": ^2.20.6
     "@types/google.maps": ^3.58.1
     husky: ~9.1.6
