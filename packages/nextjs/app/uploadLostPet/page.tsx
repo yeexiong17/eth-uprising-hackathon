@@ -12,11 +12,13 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
 
 const UploadPage = () => {
   const [formData, setFormData] = useState({
-    breed: "",
+    name: "",
+    breed: "", 
     color: "",
     lastSeen: "",
     description: "",
     location: { lat: null, lng: null },
+    prizeAmount: "",
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -148,7 +150,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       // Create a new pet object with the form data
       const newPet = {
           id: Date.now().toString(), // Unique ID
-          name: formData.breed, // Using breed as name since no separate name field
+          name: formData.name, // Using breed as name since no separate name field
           breed: formData.breed,
           color: formData.color,
           lastSeen: formData.lastSeen,
@@ -156,7 +158,8 @@ const handleSubmit = async (e: React.FormEvent) => {
           longitude: formData.location.lng,
           status: "Lost", // Since this form is for lost pets
           image: imageBase64, // Store the image in Base64 format
-          description: formData.description
+          description: formData.description,
+          prizeAmount: formData.prizeAmount,
       };
 
       // Get existing pets from localStorage or initialize
@@ -227,6 +230,20 @@ const convertImageToBase64 = (file: File): Promise<string> => {
               )}
             </div>
           </div>
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">Pet Name</span>
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              placeholder="e.g., Max"
+              className="input input-bordered w-full rounded-md"
+              required
+            />
+          </div>
 
           <div className="form-control">
             <label className="label">
@@ -276,6 +293,26 @@ const convertImageToBase64 = (file: File): Promise<string> => {
               <span className="label-text">Description</span>
             </label>
             <textarea name="description" value={formData.description} onChange={handleInputChange} placeholder="Provide additional details about your pet (age, distinctive marks, behavior, etc.)" className="textarea textarea-bordered w-full h-32 rounded-md" required />
+          </div>
+          {/* Prize Award */}
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">Prize Award (ETH)</span>
+            </label>
+            <input
+              type="number"
+              name="prizeAmount" 
+              value={formData.prizeAmount}
+              onChange={handleInputChange}
+              placeholder="e.g., 0.1"
+              step="0.001"
+              min="0"
+              className="input input-bordered w-full rounded-md"
+              required
+            />
+            <label className="label">
+              <span className="label-text-alt text-gray-500">Enter the amount you want to offer as a reward in ETH</span>
+            </label>
           </div>
 
           {/* Submit Button */}

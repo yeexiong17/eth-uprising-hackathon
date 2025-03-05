@@ -18,11 +18,13 @@ const PetDescription = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [foundPets, setFoundPets] = useState([]);
   const [formData, setFormData] = useState({
+    name: "",
     breed: "",
     color: "",
     lastSeen: "",
     description: "",
     location: { lat: null, lng: null },
+    prizeAmount: 0,
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -68,9 +70,26 @@ const PetDescription = () => {
 
     const amountPerUser = rewardAmount / verifiedPets.length;
     alert(`Reward of ${amountPerUser} has been distributed to each verified user!`);
+    updatePetStatus();
   };
 
-  const handleSubmit = async (e) => {
+  const updatePetStatus = () => {
+    const storedPetsJSON = localStorage.getItem("petData");
+    if (!storedPetsJSON) return;
+
+    const storedPets = JSON.parse(storedPetsJSON);
+    const updatedPets = storedPets.pets.map((p) =>
+      p.id.toString() === petId ? { ...p, status: "Found" } : p
+    );
+
+    // ✅ Save updated pet status to localStorage
+    localStorage.setItem("petData", JSON.stringify({ pets: updatedPets }));
+
+    // ✅ Update UI
+    setPet((prevPet) => prevPet ? { ...prevPet, status: "Found" } : null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.location.lat || !formData.location.lng) return alert("Please select a valid location.");
     if (!selectedImage) return alert("Please upload an image of the pet.");
@@ -79,7 +98,7 @@ const PetDescription = () => {
   
     const newFoundPet = {
       id: Date.now().toString(),
-      name: formData.breed,
+      name: formData.name,
       breed: formData.breed,
       color: formData.color,
       lastSeen: formData.lastSeen,
@@ -87,6 +106,7 @@ const PetDescription = () => {
       longitude: formData.location.lng,
       image: imageBase64,
       description: formData.description,
+      prizeAmount: pet?.prizeAmount || 0, // Use the original pet's prize amount
     };
   
     // 🔥 Retrieve the existing found pets for this specific pet
@@ -97,12 +117,12 @@ const PetDescription = () => {
     const updatedFoundPets = [...storedFoundPets, newFoundPet];
     localStorage.setItem(`foundPets_${petId}`, JSON.stringify(updatedFoundPets));
   
-    // ✅ Update state only for this pet’s found reports
+    // ✅ Update state only for this pet's found reports
     setFoundPets(updatedFoundPets);
   
     // Reset form and close modal
     setModalOpen(false);
-    setFormData({ breed: "", color: "", lastSeen: "", description: "", location: { lat: null, lng: null } });
+    setFormData({ name: "", breed: "", color: "", lastSeen: "", description: "", location: { lat: null, lng: null }, prizeAmount: 0 });
     setPreviewUrl(null);
     setSelectedImage(null);
   };
@@ -195,6 +215,7 @@ const PetDescription = () => {
           <p>🎨 Color: {pet?.color}</p>
           <p>📍 Last Seen: {pet?.lastSeen}</p>
           <p>📝 {pet?.description}</p>
+          <p>💰 Prize Award: {pet?.prizeAmount} ETH</p>  
         </div>
       </div>
       <div className="mt-6 text-center">
