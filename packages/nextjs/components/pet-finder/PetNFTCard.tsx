@@ -20,11 +20,11 @@ export const PetNFTCard = ({ pet }: PetNFTCardProps) => {
         <>
             <div className="group relative bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
                 {/* Image Container */}
-                <div className="relative h-40 overflow-hidden">
+                <div className="relative h-40 overflow-hidden bg-gray-100">
                     <img
                         src={pet.imageUrl}
                         alt={pet.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
                     />
                     {/* Overlay Gradient */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

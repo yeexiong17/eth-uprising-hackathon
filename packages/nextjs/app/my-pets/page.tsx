@@ -46,7 +46,7 @@ const MyPetsPage = () => {
             {/* Hero Section */}
             <div className="bg-white py-4 border-b">
                 <div className="container mx-auto px-4">
-                    <div className="flex flex-col md:flex-row justify-between items-center gap-2">
+                    <div className="flex flex-col justify-between items-center gap-2">
                         <div className="flex-1">
                             <div className="flex flex-col justify-center items-center gap-3">
                                 <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
