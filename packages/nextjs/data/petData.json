@@ -14,7 +14,7 @@
         },
         {
             "id": 2,
-            "name": "Husky Found",
+            "name": "Husky",
             "breed": "Siberian Husky",
             "color": "Black & White",
             "lastSeen": "Wangsa Maju LRT",
@@ -26,7 +26,7 @@
         },
         {
             "id": 3,
-            "name": "Shepherd Found",
+            "name": "Shepherd",
             "breed": "German Shepherd",
             "color": "Brown & Black",
             "lastSeen": "Setapak Central Mall",
@@ -47,6 +47,102 @@
             "latitude": 3.2105,
             "longitude": 101.7181,
             "status": "Lost"
+        },
+        {
+            "id": 5,
+            "name": "Max",
+            "breed": "Labrador",
+            "color": "Chocolate Brown",
+            "lastSeen": "Wangsa Walk Mall",
+            "image": "/6.avif",
+            "reporter": "0x567...opqr",
+            "latitude": 3.1998,
+            "longitude": 101.7167,
+            "status": "Lost"
+        },
+        {
+            "id": 6,
+            "name": "Bella",
+            "breed": "Shih Tzu",
+            "color": "White and Brown",
+            "lastSeen": "Sri Rampai LRT",
+            "image": "/7.avif",
+            "reporter": "0x890...stuv",
+            "latitude": 3.2084,
+            "longitude": 101.7250,
+            "status": "Found"
+        },
+        {
+            "id": 7,
+            "name": "Rocky",
+            "breed": "Rottweiler",
+            "color": "Black and Tan",
+            "lastSeen": "Melati Utama",
+            "image": "/8.avif",
+            "reporter": "0x234...wxyz",
+            "latitude": 3.1906,
+            "longitude": 101.7057,
+            "status": "Lost"
+        },
+        {
+            "id": 8,
+            "name": "Daisy",
+            "breed": "Poodle",
+            "color": "White",
+            "lastSeen": "Setapak Green",
+            "image": "/9.avif",
+            "reporter": "0x345...abcd",
+            "latitude": 3.2045,
+            "longitude": 101.7210,
+            "status": "Found"
+        },
+        {
+            "id": 9,
+            "name": "Charlie",
+            "breed": "Beagle",
+            "color": "Tricolor",
+            "lastSeen": "Danau Kota Lake",
+            "image": "/10.avif",
+            "reporter": "0x678...efgh",
+            "latitude": 3.2112,
+            "longitude": 101.7147,
+            "status": "Lost"
+        },
+        {
+            "id": 10,
+            "name": "Milo",
+            "breed": "Mixed Breed",
+            "color": "Brown and White",
+            "lastSeen": "Taman Melati LRT",
+            "image": "/11.avif",
+            "reporter": "0x901...ijkl",
+            "latitude": 3.2156,
+            "longitude": 101.7419,
+            "status": "Found"
+        },
+        {
+            "id": 11,
+            "name": "Lucy",
+            "breed": "Persian Cat",
+            "color": "White and Grey",
+            "lastSeen": "Setapak Village",
+            "image": "/12.avif",
+            "reporter": "0x432...mnop",
+            "latitude": 3.2001,
+            "longitude": 101.7144,
+            "status": "Lost"
+        },
+        {
+            "id": 12,
+            "name": "Tiger",
+            "breed": "Maine Coon",
+            "color": "Orange Tabby",
+            "lastSeen": "PV128",
+            "image": "/13.avif",
+            "reporter": "0x765...qrst",
+            "latitude": 3.2054,
+            "longitude": 101.7229,
+            "status": "Found"
         }
     ]
 }
