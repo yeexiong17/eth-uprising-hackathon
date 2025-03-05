@@ -4,6 +4,7 @@ import Link from "next/link";
 import Map, { Marker, Popup } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useRouter } from "next/navigation";
+import { useEffect } from 'react';
 import { AuthGuard } from "~~/components/AuthGuard";
 import { useState } from 'react';
 import petData from "../../data/petData.json";
@@ -16,6 +17,29 @@ const Home = () => {
         ...mapCenter,
         zoom: 11.5
     });
+    const [pets, setPets] = useState([]);
+
+    useEffect(() => {
+        const loadPetData = () => {
+            try {
+                // First try to get data from localStorage
+                const storedPetsJSON = localStorage.getItem('petData');
+                if (storedPetsJSON) {
+                    const storedPets = JSON.parse(storedPetsJSON);
+                    setPets(storedPets.pets);
+                } else {
+                    // If no data in localStorage, use the default petData
+                    setPets(petData.pets);
+                }
+            } catch (error) {
+                console.error('Error loading pet data:', error);
+                setPets(petData.pets); // Fallback to default data
+            }
+        };
+
+        loadPetData();
+    }, []);
+
 
     // Add this placeholder image URL
     const placeholderImage = "https://placehold.co/400x300/e2e8f0/1e293b?text=Pet+Image";
@@ -81,7 +105,7 @@ const Home = () => {
                                 });
                             }}
                         >
-                            {petData.pets.map((pet) => (
+                            {pets.map((pet) => (
                                 <Marker
                                     key={pet.id}
                                     latitude={pet.latitude}
@@ -115,7 +139,7 @@ const Home = () => {
                                             <div className="flex-shrink-0 w-20 h-20 md:w-24 md:h-24 rounded-lg overflow-hidden bg-gray-100">
                                                 <img
                                                     src={selectedPet.image || placeholderImage}
-                                                    alt={`${selectedPet.name || 'Pet'} image`}
+                                                    alt={`${selectedPet.breed || 'Pet'} image`}
                                                     className="w-full h-full object-cover"
                                                     onError={(e) => {
                                                         e.target.src = placeholderImage;
@@ -171,16 +195,8 @@ const Home = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
-                    <Link href="/petDescription" className="group">
-                        <div className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-md p-4 md:p-8 transition-all duration-200 transform group-hover:-translate-y-1">
-                            <h3 className="text-xl md:text-2xl font-semibold mb-2 md:mb-3">Browse Lost & Found Pets</h3>
-                            <p className="text-blue-100 text-xs md:text-sm">View detailed listings of all reported pets in your area</p>
-                            <div className="mt-3 md:mt-4 text-blue-200 group-hover:translate-x-2 transition-transform duration-200">
-                                →
-                            </div>
-                        </div>
-                    </Link>
+                <div className="grid ">
+                    
 
                     <Link href="/uploadLostPet" className="group">
                         <div className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl shadow-md p-4 md:p-8 transition-all duration-200 transform group-hover:-translate-y-1">

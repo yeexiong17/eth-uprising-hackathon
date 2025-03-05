@@ -27,12 +27,6 @@ export const StatsCards = () => {
                     </p>
                     <p className="text-gray-600 font-medium">Total Reports</p>
                 </div>
-
-                <div className="bg-white rounded-lg shadow-md p-6 text-center transform hover:scale-105 transition-transform duration-200">
-                    <div className="text-purple-500 text-4xl mb-2">⚡</div>
-                    <p className="text-2xl font-bold text-purple-500 mb-1">24/7</p>
-                    <p className="text-gray-600 font-medium">Active Support</p>
-                </div>
             </div>
         </div>
     );

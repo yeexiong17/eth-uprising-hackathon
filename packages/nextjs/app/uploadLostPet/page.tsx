@@ -1,9 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useAccount } from "wagmi";
 import { AuthGuard } from "~~/components/AuthGuard";
+import mapboxgl from "mapbox-gl";
+import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
+import "mapbox-gl/dist/mapbox-gl.css";
+import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
+
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
 
 const UploadPage = () => {
   const [formData, setFormData] = useState({
@@ -11,13 +16,97 @@ const UploadPage = () => {
     color: "",
     lastSeen: "",
     description: "",
+    location: { lat: null, lng: null },
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const markerRef = useRef<mapboxgl.Marker | null>(null);
+  const geocoderRef = useRef<MapboxGeocoder | null>(null);
+
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+
+    // Initialize the Mapbox map
+    mapRef.current = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      style: "mapbox://styles/mapbox/streets-v11",
+      center: [101.7118, 3.2003], // Default center (Malaysia)
+      zoom: 12,
+    });
+
+    // Initialize the Mapbox Geocoder
+    geocoderRef.current = new MapboxGeocoder({
+      accessToken: mapboxgl.accessToken,
+      mapboxgl: mapboxgl,
+      placeholder: "Search for a location...",
+      marker: false,
+    });
+
+    // Append the geocoder to the input field container
+    const geocoderContainer = document.getElementById("geocoder-container");
+    if (geocoderContainer) {
+      geocoderContainer.appendChild(geocoderRef.current.onAdd(mapRef.current));
+    }
+
+    // Handle place selection from search
+    geocoderRef.current.on("result", (e) => {
+      const { center, place_name } = e.result;
+
+      if (center) {
+        const [lng, lat] = center;
+
+        // Update state with selected location
+        setFormData((prev) => ({
+          ...prev,
+          lastSeen: place_name,
+          location: { lat, lng },
+        }));
+
+        // Move the map to the selected location
+        mapRef.current?.flyTo({
+          center: [lng, lat],
+          zoom: 14,
+        });
+
+        // Remove previous marker if exists
+        if (markerRef.current) markerRef.current.remove();
+
+        // Add a new marker
+        markerRef.current = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(mapRef.current);
+      }
+    });
+
+    // Allow users to click on the map to select a location
+    mapRef.current.on("click", (e) => {
+      const { lng, lat } = e.lngLat;
+
+      // Update state with selected location
+      setFormData((prev) => ({
+        ...prev,
+        lastSeen: `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`,
+        location: { lat, lng },
+      }));
+
+      // Remove previous marker if exists
+      if (markerRef.current) markerRef.current.remove();
+
+      // Add new marker
+      markerRef.current = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(mapRef.current);
+    });
+
+    return () => {
+      mapRef.current?.remove();
+      if (geocoderRef.current) {
+        geocoderRef.current.clear();
+      }
+    };
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -26,27 +115,80 @@ const UploadPage = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setSelectedImage(file);
-      // Create preview URL for the selected image
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
+        setSelectedImage(file);
+
+        // Convert image to Base64
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = () => {
+            setPreviewUrl(reader.result as string);
+        };
     }
-  };
+};
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement the upload logic here
-    console.log("Form submitted:", { ...formData, image: selectedImage });
-  };
 
-  // Cleanup preview URL when component unmounts or new image is selected
-  useEffect(() => {
-    return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
-  }, [previewUrl]);
+const router = useRouter();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (!formData.location.lat || !formData.location.lng) {
+      alert("Please select a valid location on the map.");
+      return;
+  }
+
+  if (!selectedImage) {
+      alert("Please upload an image of the pet.");
+      return;
+  }
+
+  try {
+      // Convert the uploaded image to Base64
+      const imageBase64 = await convertImageToBase64(selectedImage);
+
+      // Create a new pet object with the form data
+      const newPet = {
+          id: Date.now().toString(), // Unique ID
+          name: formData.breed, // Using breed as name since no separate name field
+          breed: formData.breed,
+          color: formData.color,
+          lastSeen: formData.lastSeen,
+          latitude: formData.location.lat,
+          longitude: formData.location.lng,
+          status: "Lost", // Since this form is for lost pets
+          image: imageBase64, // Store the image in Base64 format
+          description: formData.description
+      };
+
+      // Get existing pets from localStorage or initialize
+      const storedPetsJSON = localStorage.getItem("petData");
+      const storedPets = storedPetsJSON ? JSON.parse(storedPetsJSON) : { pets: [] };
+
+      // Append new pet
+      storedPets.pets.push(newPet);
+
+      // Save back to localStorage
+      localStorage.setItem("petData", JSON.stringify(storedPets));
+
+      console.log("Pet uploaded:", newPet);
+
+      // Redirect to home page
+      router.push("/");
+  } catch (error) {
+      console.error("Error saving pet data:", error);
+      alert("Failed to save pet data. Please try again.");
+  }
+};
+
+// Function to Convert Image to Base64
+const convertImageToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+  });
+};
+
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -54,6 +196,7 @@ const UploadPage = () => {
         <h1 className="text-3xl font-bold mb-6 text-center">Report Lost Pet</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Image Upload */}
           <div className="form-control">
             <label className="label">
               <span className="label-text">Pet Image</span>
@@ -74,53 +217,15 @@ const UploadPage = () => {
                   </button>
                 </div>
               ) : (
-                <div className="w-full">
-                  <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-md cursor-pointer hover:bg-base-200 transition-colors">
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <svg
-                        className="w-8 h-8 mb-4 text-gray-500"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 20 16"
-                      >
-                        <path
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                        />
-                      </svg>
-                      <p className="mb-2 text-sm text-gray-500">Click to upload</p>
-                      <p className="text-xs text-gray-500">PNG, JPG or JPEG</p>
-                    </div>
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept="image/png, image/jpeg, image/jpg"
-                      onChange={handleImageChange}
-                      required
-                    />
-                  </label>
-                </div>
+                <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-md cursor-pointer hover:bg-base-200 transition-colors">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <p className="mb-2 text-sm text-gray-500">Click to upload</p>
+                    <p className="text-xs text-gray-500">PNG, JPG or JPEG</p>
+                  </div>
+                  <input type="file" className="hidden" accept="image/png, image/jpeg, image/jpg" onChange={handleImageChange} required />
+                </label>
               )}
             </div>
-          </div>
-
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">Pet Breed</span>
-            </label>
-            <input
-              type="text"
-              name="breed"
-              value={formData.breed}
-              onChange={handleInputChange}
-              placeholder="e.g., Golden Retriever"
-              className="input input-bordered w-full rounded-md"
-              required
-            />
           </div>
 
           <div className="form-control">
@@ -137,35 +242,43 @@ const UploadPage = () => {
               required
             />
           </div>
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">Pet Breed</span>
+            </label>
+            <input
+              type="text"
+              name="breed"
+              value={formData.breed}
+              onChange={handleInputChange}
+              placeholder="e.g., Golden Brown"
+              className="input input-bordered w-full rounded-md"
+              required
+            />  
+          </div>
+       
 
+          {/* Last Seen Location - Search & Clickable Map */}
           <div className="form-control">
             <label className="label">
               <span className="label-text">Last Seen Location</span>
             </label>
-            <textarea
-              name="lastSeen"
-              value={formData.lastSeen}
-              onChange={handleInputChange}
-              placeholder="Describe where the pet was last seen..."
-              className="textarea textarea-bordered w-full h-24 rounded-md"
-              required
-            />
+            <div id="geocoder-container" className="mb-2"></div>
+            <input type="text" name="lastSeen" value={formData.lastSeen} readOnly className="input input-bordered w-full rounded-md cursor-not-allowed" required />
+            <div className="mt-2 h-64 rounded-md border border-gray-300 overflow-hidden">
+              <div ref={mapContainerRef} className="w-full h-full"></div>
+            </div>
           </div>
 
+          {/* Description */}
           <div className="form-control">
             <label className="label">
               <span className="label-text">Description</span>
             </label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              placeholder="Provide additional details about your pet (age, distinctive marks, behavior, etc.)"
-              className="textarea textarea-bordered w-full h-32 rounded-md"
-              required
-            />
+            <textarea name="description" value={formData.description} onChange={handleInputChange} placeholder="Provide additional details about your pet (age, distinctive marks, behavior, etc.)" className="textarea textarea-bordered w-full h-32 rounded-md" required />
           </div>
 
+          {/* Submit Button */}
           <div className="form-control mt-8">
             <button type="submit" className="btn btn-primary w-full rounded-md">
               Upload Report
