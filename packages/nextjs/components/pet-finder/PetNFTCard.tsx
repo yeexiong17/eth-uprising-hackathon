@@ -9,7 +9,7 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
 
 interface PetNFTCardProps {
     pet: {
-        id: string;
+        tokenId: string;
         name: string;
         breed: string;
         color: string;
@@ -92,7 +92,7 @@ export const PetNFTCard = ({ pet }: PetNFTCardProps) => {
         }
 
         const lostPetReport = {
-            id: pet.id,
+            id: pet.tokenId,
             name: pet.name,
             breed: pet.breed,
             color: pet.color,

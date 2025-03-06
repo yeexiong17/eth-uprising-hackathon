@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   534351: {
     YourContract: {
-      address: "0xb99e9e9b09c4843928847e03a28fa762fe683997",
+      address: "0x75c710052d1dd323e3f2ee1899b104df8283499d",
       abi: [
         {
           type: "constructor",
@@ -82,32 +82,37 @@ const deployedContracts = {
           ],
           outputs: [
             {
-              name: "name",
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "",
               type: "string",
               internalType: "string",
             },
             {
-              name: "breed",
+              name: "",
               type: "string",
               internalType: "string",
             },
             {
-              name: "color",
+              name: "",
               type: "string",
               internalType: "string",
             },
             {
-              name: "description",
+              name: "",
               type: "string",
               internalType: "string",
             },
             {
-              name: "imageURI",
+              name: "",
               type: "string",
               internalType: "string",
             },
             {
-              name: "owner",
+              name: "",
               type: "address",
               internalType: "address",
             },
@@ -130,6 +135,11 @@ const deployedContracts = {
               type: "tuple[]",
               internalType: "struct YourContract.Pet[]",
               components: [
+                {
+                  name: "tokenId",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
                 {
                   name: "name",
                   type: "string",
@@ -312,6 +322,11 @@ const deployedContracts = {
             },
           ],
           outputs: [
+            {
+              name: "tokenId",
+              type: "uint256",
+              internalType: "uint256",
+            },
             {
               name: "name",
               type: "string",
@@ -968,7 +983,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1741278085.json",
+      deploymentFile: "run-1741280308.json",
       deploymentScript: "Deploy.s.sol",
     },
   },

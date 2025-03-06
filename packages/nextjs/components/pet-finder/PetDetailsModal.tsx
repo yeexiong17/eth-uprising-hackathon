@@ -1,6 +1,6 @@
 interface PetDetailsModalProps {
     pet: {
-        id: string;
+        tokenId: string;
         name: string;
         breed: string;
         color: string;
@@ -45,7 +45,7 @@ export const PetDetailsModal = ({ pet, isOpen, onClose }: PetDetailsModalProps) 
                             <div className="flex items-center gap-2">
                                 <h3 className="text-lg font-bold mb-0 text-gray-800">{pet.name}</h3>
                                 <span className="px-1.5 py-0.5 bg-primary/10 text-primary text-xs font-semibold rounded-full">
-                                    #{pet.id}
+                                    #{pet.tokenId}
                                 </span>
                             </div>
                         </div>

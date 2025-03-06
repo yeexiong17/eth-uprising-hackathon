@@ -9,7 +9,7 @@ import { PetNFTCard } from "~~/components/pet-finder/PetNFTCard";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 
 interface PetNFT {
-    id: string;
+    tokenId: string;
     name: string;
     breed: string;
     color: string;
@@ -32,8 +32,8 @@ const MyPetsPage = () => {
     useEffect(() => {
         if (petsData) {
             console.log(petsData);
-            const formattedPets = petsData.map((pet, index) => ({
-                id: (index + 1).toString(),
+            const formattedPets = petsData.map((pet) => ({
+                tokenId: pet.tokenId.toString(),
                 name: pet.name,
                 breed: pet.breed,
                 color: pet.color,
@@ -77,7 +77,7 @@ const MyPetsPage = () => {
                 {myPets.length > 0 ? (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
                         {myPets.map((pet) => (
-                            <PetNFTCard key={pet.id} pet={pet} />
+                            <PetNFTCard key={pet.tokenId} pet={pet} />
                         ))}
                     </div>
                 ) : (

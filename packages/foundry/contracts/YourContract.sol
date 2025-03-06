@@ -10,8 +10,8 @@ contract YourContract is ERC721URIStorage {
     mapping(uint256 => mapping(address => Sighting)) public sightings;
     mapping(uint256 => address[]) public verifications;
     mapping(uint256 => uint256) public rewardPool;
-
     struct Pet {
+        uint256 tokenId;
         string name;
         string breed;
         string color;
@@ -59,7 +59,9 @@ contract YourContract is ERC721URIStorage {
         uint256 tokenId = nextTokenId++;
         _safeMint(msg.sender, tokenId);
         _setTokenURI(tokenId, imageURI);
+
         pets[tokenId] = Pet(
+            tokenId,
             name,
             breed,
             color,
@@ -77,17 +79,19 @@ contract YourContract is ERC721URIStorage {
         external
         view
         returns (
-            string memory name,
-            string memory breed,
-            string memory color,
-            string memory description,
-            string memory imageURI,
-            address owner
+            uint256,
+            string memory,
+            string memory,
+            string memory,
+            string memory,
+            string memory,
+            address
         )
     {
         require(ownerOf(tokenId) != address(0), "Pet NFT does not exist.");
         Pet memory pet = pets[tokenId];
         return (
+            pet.tokenId,
             pet.name,
             pet.breed,
             pet.color,
