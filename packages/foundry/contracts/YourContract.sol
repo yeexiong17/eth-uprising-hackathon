@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
-contract PetIdentityNFT is ERC721URIStorage {
+contract YourContract is ERC721URIStorage {
     uint256 public nextTokenId;
     mapping(uint256 => Pet) public pets;
     mapping(uint256 => bool) public isLost;
