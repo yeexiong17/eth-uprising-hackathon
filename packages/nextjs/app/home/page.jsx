@@ -8,6 +8,7 @@ import { useEffect } from 'react';
 import { AuthGuard } from "~~/components/AuthGuard";
 import { useState } from 'react';
 import petData from "../../data/petData.json";
+import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 
 const Home = () => {
     const router = useRouter();
@@ -19,45 +20,33 @@ const Home = () => {
     });
     const [pets, setPets] = useState([]);
 
+
+    const { data: petsData } = useScaffoldReadContract({
+        contractName: "YourContract",
+        functionName: "getAllLostPets",
+        watch: true,
+    });
+
     useEffect(() => {
-        const loadPetData = () => {
-            try {
-                let allPets = [];
+        if (petsData) {
+            console.log(petsData);
+            const formattedPets = petsData.map((pet) => ({
+                tokenId: pet.tokenId,
+                name: pet.name,
+                breed: pet.breed,
+                color: pet.color,
+                description: pet.description,
+                imageUrl: pet.imageURI,
+                latitude: Number(pet.latitude) / 100000,
+                longitude: Number(pet.longitude) / 100000,
+                owner: pet.owner,
+                reward: Number(pet.reward),
+                isLost: pet.isLost,
+            }));
 
-                // 🔥 Load stored pets from localStorage or fallback to `petData.json`
-                const storedPetsJSON = localStorage.getItem('petData');
-                if (storedPetsJSON) {
-                    const storedPets = JSON.parse(storedPetsJSON);
-                    allPets = storedPets.pets;
-                } else {
-                    allPets = petData.pets;
-                }
-
-                // 🔥 Load lost pets from localStorage
-                const lostPetsJSON = localStorage.getItem("lostPetReports");
-                const lostPets = lostPetsJSON ? JSON.parse(lostPetsJSON) : [];
-
-                // 🔥 Merge lost pets into the list (Only pets with valid coordinates)
-                const mergedPets = [...allPets, ...lostPets].filter(
-                    pet => pet.latitude && pet.longitude && !isNaN(pet.latitude) && !isNaN(pet.longitude)
-                );
-
-                setPets(mergedPets);
-            } catch (error) {
-                console.error('Error loading pet data:', error);
-                setPets(petData.pets);
-            }
-        };
-
-        loadPetData();
-
-        // 🔥 Listen for updates when a new lost pet is reported
-        window.addEventListener("lostPetUpdated", loadPetData);
-
-        return () => {
-            window.removeEventListener("lostPetUpdated", loadPetData);
-        };
-    }, []);
+            setPets(formattedPets);
+        }
+    }, [petsData]);
 
     // Add this placeholder image URL
     const placeholderImage = "https://placehold.co/400x300/e2e8f0/1e293b?text=Pet+Image";
@@ -126,7 +115,7 @@ const Home = () => {
                             {pets.map((pet) => (
                                 pet.latitude && pet.longitude && !isNaN(pet.latitude) && !isNaN(pet.longitude) && (
                                     <Marker
-                                        key={pet.id}
+                                        key={pet.tokenId}
                                         latitude={pet.latitude}
                                         longitude={pet.longitude}
                                         onClick={(e) => {
@@ -136,7 +125,7 @@ const Home = () => {
                                         style={{ cursor: 'pointer' }}
                                     >
                                         <div className="text-xl md:text-2xl transform hover:scale-110 transition-transform duration-200" title={pet.name}>
-                                            {pet.status === "Lost" ? "🔴" : "🟢"}
+                                            {pet.isLost === true ? "🔴" : "🟢"}
                                         </div>
                                     </Marker>
                                 )
@@ -171,11 +160,11 @@ const Home = () => {
                                             {/* Right Side - Details */}
                                             <div className="flex-1 min-w-0">
                                                 {/* Status Badge */}
-                                                <div className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mb-1 ${selectedPet.status === "Lost"
+                                                <div className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mb-1 ${selectedPet.isLost === true
                                                     ? "bg-red-100 text-red-800"
                                                     : "bg-green-100 text-green-800"
                                                     }`}>
-                                                    {selectedPet.status}
+                                                    {selectedPet.isLost === true ? "Lost" : "Found"}
                                                 </div>
 
                                                 {/* Pet Name */}
@@ -185,17 +174,13 @@ const Home = () => {
 
                                                 {/* Pet Details */}
                                                 <div className="space-y-0.5 text-xs text-gray-600">
-                                                    <p className="truncate">
+                                                    <p className="truncate m-0">
                                                         <span className="font-medium text-gray-700">Breed:</span>{' '}
                                                         {selectedPet.breed}
                                                     </p>
-                                                    <p className="truncate">
+                                                    <p className="truncate m-0">
                                                         <span className="font-medium text-gray-700">Color:</span>{' '}
                                                         {selectedPet.color}
-                                                    </p>
-                                                    <p className="truncate">
-                                                        <span className="font-medium text-gray-700">Last Seen:</span>{' '}
-                                                        {selectedPet.lastSeen}
                                                     </p>
                                                 </div>
                                             </div>
@@ -203,7 +188,7 @@ const Home = () => {
 
                                         {/* Action Button */}
                                         <button
-                                            onClick={() => router.push(`/petDescription?id=${selectedPet.id}`)}
+                                            onClick={() => router.push(`/petDescription?id=${selectedPet.tokenId}`)}
                                             className="bg-blue-500 text-white px-2 py-1 rounded-lg text-xs hover:bg-blue-600 w-full mt-2 font-medium transition-all duration-200 hover:shadow-md"
                                         >
                                             View Full Details

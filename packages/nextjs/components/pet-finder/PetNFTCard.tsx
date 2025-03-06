@@ -4,6 +4,8 @@ import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import { PetDetailsModal } from "./PetDetailsModal";
+import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { parseEther } from 'ethers';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
 
@@ -19,6 +21,9 @@ interface PetNFTCardProps {
 }
 
 export const PetNFTCard = ({ pet }: PetNFTCardProps) => {
+
+    const { writeContractAsync: writeYourContractAsync } = useScaffoldWriteContract({ contractName: "YourContract" });
+
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
     const [prizeAmount, setPrizeAmount] = useState("");
@@ -80,7 +85,7 @@ export const PetNFTCard = ({ pet }: PetNFTCardProps) => {
         };
     }, [isReportModalOpen]);
 
-    const handleSubmitReport = () => {
+    const handleSubmitReport = async () => {
         if (!location.lat || !location.lng || isNaN(location.lat) || isNaN(location.lng)) {
             alert("Please select a valid location on the map.");
             return;
@@ -92,20 +97,28 @@ export const PetNFTCard = ({ pet }: PetNFTCardProps) => {
         }
 
         const lostPetReport = {
-            id: pet.tokenId,
-            name: pet.name,
-            breed: pet.breed,
-            color: pet.color,
-            description: pet.description,
-            imageUrl: pet.imageUrl,
-            lastSeen,
-            latitude: parseFloat(location.lat.toString()),  // ✅ Ensure it's a number
-            longitude: parseFloat(location.lng.toString()), // ✅ Ensure it's a number
+            tokenId: pet.tokenId,
+            latitude: Math.floor(location.lat * 100000),  // Convert to integer
+            longitude: Math.floor(location.lng * 100000), // Convert to integer
             prizeAmount,
-            status: "Lost"
         };
 
-        // 🔥 Save lost pet reports in localStorage
+        try {
+            await writeYourContractAsync({
+                functionName: "reportLost",
+                args: [
+                    BigInt(lostPetReport.tokenId),
+                    BigInt(lostPetReport.latitude),
+                    BigInt(lostPetReport.longitude),
+                ],
+                value: parseEther(prizeAmount),
+            });
+        } catch (error) {
+            console.error("Error submitting lost pet report:", error);
+            alert("An error occurred while submitting the lost pet report. Please try again.");
+        }
+
+        // Save lost pet reports in localStorage
         const storedReports = localStorage.getItem("lostPetReports");
         const reports = storedReports ? JSON.parse(storedReports) : [];
         reports.push(lostPetReport);
@@ -113,7 +126,7 @@ export const PetNFTCard = ({ pet }: PetNFTCardProps) => {
 
         alert("Lost pet report submitted successfully!");
 
-        // 🔥 Notify home page to refresh map markers
+        // Notify home page to refresh map markers
         window.dispatchEvent(new Event("lostPetUpdated"));
 
         setIsReportModalOpen(false);

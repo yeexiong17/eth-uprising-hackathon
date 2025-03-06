@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   534351: {
     YourContract: {
-      address: "0x75c710052d1dd323e3f2ee1899b104df8283499d",
+      address: "0xbfde1b9780bfa7315a0c4df24c7d33098f3757a5",
       abi: [
         {
           type: "constructor",
@@ -53,6 +53,76 @@ const deployedContracts = {
         },
         {
           type: "function",
+          name: "getAllLostPets",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "tuple[]",
+              internalType: "struct YourContract.LostPet[]",
+              components: [
+                {
+                  name: "tokenId",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "name",
+                  type: "string",
+                  internalType: "string",
+                },
+                {
+                  name: "breed",
+                  type: "string",
+                  internalType: "string",
+                },
+                {
+                  name: "color",
+                  type: "string",
+                  internalType: "string",
+                },
+                {
+                  name: "description",
+                  type: "string",
+                  internalType: "string",
+                },
+                {
+                  name: "imageURI",
+                  type: "string",
+                  internalType: "string",
+                },
+                {
+                  name: "owner",
+                  type: "address",
+                  internalType: "address",
+                },
+                {
+                  name: "isLost",
+                  type: "bool",
+                  internalType: "bool",
+                },
+                {
+                  name: "reward",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "latitude",
+                  type: "int256",
+                  internalType: "int256",
+                },
+                {
+                  name: "longitude",
+                  type: "int256",
+                  internalType: "int256",
+                },
+              ],
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
           name: "getApproved",
           inputs: [
             {
@@ -72,7 +142,7 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "getPetDetails",
+          name: "getLostPet",
           inputs: [
             {
               name: "tokenId",
@@ -115,6 +185,79 @@ const deployedContracts = {
               name: "",
               type: "address",
               internalType: "address",
+            },
+            {
+              name: "",
+              type: "bool",
+              internalType: "bool",
+            },
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "",
+              type: "int256",
+              internalType: "int256",
+            },
+            {
+              name: "",
+              type: "int256",
+              internalType: "int256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "getSightings",
+          inputs: [
+            {
+              name: "tokenId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "tuple[]",
+              internalType: "struct YourContract.SightingInfo[]",
+              components: [
+                {
+                  name: "user",
+                  type: "address",
+                  internalType: "address",
+                },
+                {
+                  name: "sighting",
+                  type: "tuple",
+                  internalType: "struct YourContract.Sighting",
+                  components: [
+                    {
+                      name: "latitude",
+                      type: "int256",
+                      internalType: "int256",
+                    },
+                    {
+                      name: "longitude",
+                      type: "int256",
+                      internalType: "int256",
+                    },
+                    {
+                      name: "description",
+                      type: "string",
+                      internalType: "string",
+                    },
+                    {
+                      name: "imageURI",
+                      type: "string",
+                      internalType: "string",
+                    },
+                  ],
+                },
+              ],
             },
           ],
           stateMutability: "view",
@@ -210,6 +353,11 @@ const deployedContracts = {
             },
           ],
           outputs: [
+            {
+              name: "tokenId",
+              type: "uint256",
+              internalType: "uint256",
+            },
             {
               name: "isLost",
               type: "bool",
@@ -510,6 +658,16 @@ const deployedContracts = {
               type: "int256",
               internalType: "int256",
             },
+            {
+              name: "description",
+              type: "string",
+              internalType: "string",
+            },
+            {
+              name: "imageURI",
+              type: "string",
+              internalType: "string",
+            },
           ],
           stateMutability: "view",
         },
@@ -605,6 +763,16 @@ const deployedContracts = {
               name: "longitude",
               type: "int256",
               internalType: "int256",
+            },
+            {
+              name: "description",
+              type: "string",
+              internalType: "string",
+            },
+            {
+              name: "imageURI",
+              type: "string",
+              internalType: "string",
             },
           ],
           outputs: [],
@@ -983,7 +1151,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1741280308.json",
+      deploymentFile: "run-1741285027.json",
       deploymentScript: "Deploy.s.sol",
     },
   },

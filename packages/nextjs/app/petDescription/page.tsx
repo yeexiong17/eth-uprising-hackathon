@@ -7,16 +7,31 @@ import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import { AuthGuard } from "~~/components/AuthGuard";
+import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
+
+interface PetData {
+  tokenId: bigint; // Assuming tokenId is a bigint
+  name: string;
+  breed: string;
+  color: string;
+  description: string;
+  imageUrl: string; // Ensure this matches the property returned
+  latitude: bigint; // Assuming latitude is stored as bigint
+  longitude: bigint; // Assuming longitude is stored as bigint
+  isLost: boolean;
+  reward: bigint; // Assuming reward is stored as bigint
+  prizeAmount: bigint; // Add prizeAmount property
+}
 
 const PetDescription = () => {
   const searchParams = useSearchParams();
   const petId = searchParams.get("id");
 
-  const [pet, setPet] = useState(null);
+  const [pet, setPet] = useState<PetData | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [foundPets, setFoundPets] = useState([]);
+  const [foundPets, setFoundPets] = useState<{ id: string; name: string; breed: string; color: string; lastSeen: string; image: string; description: string; }[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     breed: "",
@@ -35,28 +50,39 @@ const PetDescription = () => {
   const markerRef = useRef<mapboxgl.Marker | null>(null);
   const geocoderRef = useRef<MapboxGeocoder | null>(null);
 
+  const { data: petsData } = useScaffoldReadContract({
+    contractName: "YourContract",
+    functionName: "getLostPet",
+    args: [BigInt(petId!)],
+    watch: true,
+  });
+
   useEffect(() => {
     if (!petId) return;
-    setPet(null); // ✅ Reset pet before fetching new data
-  
-    let allPets = [];
-  
-    const storedPetsJSON = localStorage.getItem("petData");
-    if (storedPetsJSON) {
-      const storedPets = JSON.parse(storedPetsJSON).pets;
-      allPets = storedPets;
+    setPet(null); // Reset pet before fetching new data
+
+    if (petsData && petsData.length > 0) {
+      console.log(petsData);
+      const formattedPets = {
+        tokenId: Number(petsData[0]).toString(),
+        name: petsData[1],
+        breed: petsData[2],
+        color: petsData[3],
+        description: petsData[4],
+        imageUrl: petsData[5],
+        latitude: Number(petsData[9]) / 100000,
+        longitude: Number(petsData[10]) / 100000,
+        isLost: petsData[7],
+        reward: Number(petsData[8]) / 10 ** 18,
+      };
+
+      console.log(formattedPets);
+
+      setPet(formattedPets);
     }
-  
-    const lostPetsJSON = localStorage.getItem("lostPetReports");
-    const lostPets = lostPetsJSON ? JSON.parse(lostPetsJSON) : [];
-  
-    const mergedPets = [...allPets, ...lostPets];
-  
-    const foundPet = mergedPets.find((p) => p.id.toString() === petId);
-    if (foundPet) setPet(foundPet);
-  }, [petId]);
-  
-  
+  }, [petsData]);
+
+
 
   const handleVerify = (foundPetId) => {
     if (verifiedPets.includes(foundPetId)) return;
@@ -93,17 +119,17 @@ const PetDescription = () => {
 
   useEffect(() => {
     if (!petId) return;
-  
+
     const loadFoundPets = () => {
       const storedFoundPetsJSON = localStorage.getItem(`foundPets_${petId}`);
       setFoundPets(storedFoundPetsJSON ? JSON.parse(storedFoundPetsJSON) : []);
     };
-  
+
     loadFoundPets();
-  
+
     // Listen for localStorage changes
     window.addEventListener("storage", loadFoundPets);
-  
+
     return () => {
       window.removeEventListener("storage", loadFoundPets);
     };
@@ -144,7 +170,7 @@ const PetDescription = () => {
       longitude: formData.location.lng,
       image: imageBase64,
       description: formData.description,
-      prizeAmount: pet?.prizeAmount || 0, // Use the original pet's prize amount
+      prizeAmount: pet?.prizeAmount ? pet.prizeAmount / BigInt(10 ** 18) : 0, // Convert wei to eth
     };
 
     // 🔥 Retrieve the existing found pets for this specific pet
@@ -237,8 +263,8 @@ const PetDescription = () => {
   };
 
 
-  const convertImageToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
+  const convertImageToBase64 = (file: File) => {
+    return new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => resolve(reader.result as string);
@@ -260,19 +286,18 @@ const PetDescription = () => {
       <div className="bg-white p-6 rounded-lg shadow-md flex flex-col md:flex-row items-center w-full">
         {/* 🔹 Pet Image */}
         <img
-          src={pet?.imageUrl || "/placeholder.jpg"}
+          src={pet?.imageUrl}
           alt={pet?.name}
-          className="w-32 h-32 md:w-40 md:h-40 object-cover rounded-md border"
+          className="w-full h-40 object-contain rounded-md border"
         />
 
         {/* 🔹 Pet Info */}
         <div className="md:ml-6 mt-4 md:mt-0 text-center md:text-left flex-grow">
-          <h2 className="text-xl md:text-2xl font-semibold">{pet?.name}</h2>
+          <h2 className="text-xl md:text-2xl font-semibold text-gray-800">{pet?.name}</h2>
           <p className="text-gray-700">🐕 Breed: {pet?.breed}</p>
           <p className="text-gray-700">🎨 Color: {pet?.color}</p>
-          <p className="text-gray-700">📍 Last Seen: {pet?.lastSeen}</p>
           <p className="text-gray-700">📝 {pet?.description}</p>
-          <p className="text-gray-700 font-semibold">💰 Prize: {pet?.prizeAmount} ETH</p>
+          <p className="text-gray-700 font-semibold">💰 Prize: {pet?.reward} ETH</p>
         </div>
 
         <div className="mt-4 md:mt-0 flex flex-col space-y-4">
