@@ -59,9 +59,6 @@ const Home = () => {
         };
     }, []);
 
-
-
-
     // Add this placeholder image URL
     const placeholderImage = "https://placehold.co/400x300/e2e8f0/1e293b?text=Pet+Image";
 
