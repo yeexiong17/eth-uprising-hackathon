@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { useContractWrite } from "wagmi";
-// Import your contract ABI and address here
+import { useYourContract } from "../../hooks/useContract";
 
 interface MintPetModalProps {
     isOpen: boolean;
@@ -57,20 +56,16 @@ export const MintPetModal = ({ isOpen, onClose, onMintSuccess }: MintPetModalPro
             if (response.ok) {
                 const ipfsHash = data.IpfsHash; // Get the IPFS URL
                 console.log("Image uploaded successfully:", ipfsHash);
- 
+
                 // Step 2: Prepare metadata for the NFT
-                const metadata = {
-                    name: formData.name,
-                    description: formData.description,
-                    image: `ipfs://${ipfsHash}`, // Storing image as per ERC-721 standard
-                    attributes: [
-                        { trait_type: "Breed", value: formData.breed },
-                        { trait_type: "Color", value: formData.color },
-                    ],
-                };
+                const name = formData.name;
+                const breed = formData.breed;
+                const color = formData.color;
+                const description = formData.description;
+                const imageURI = `https://gateway.pinata.cloud/ipfs/${ipfsHash}`;
 
                 // Step 3: Call the smart contract to mint the NFT
-                await mintNFT(metadata); // Replace with your actual minting function
+                await useYourContract.mintPetNFT(metadata); // Replace with your actual minting function
 
                 // Step 4: Call onMintSuccess with the new pet data
                 onMintSuccess({ ...formData, image: ipfsHash });
