@@ -37,25 +37,26 @@ const PetDescription = () => {
 
   useEffect(() => {
     if (!petId) return;
-
-    // Fetch pet details
+    setPet(null); // ✅ Reset pet before fetching new data
+  
+    let allPets = [];
+  
     const storedPetsJSON = localStorage.getItem("petData");
-    const storedPets = storedPetsJSON ? JSON.parse(storedPetsJSON).pets : [];
-    const foundPet = storedPets.find((p) => p.id.toString() === petId);
+    if (storedPetsJSON) {
+      const storedPets = JSON.parse(storedPetsJSON).pets;
+      allPets = storedPets;
+    }
+  
+    const lostPetsJSON = localStorage.getItem("lostPetReports");
+    const lostPets = lostPetsJSON ? JSON.parse(lostPetsJSON) : [];
+  
+    const mergedPets = [...allPets, ...lostPets];
+  
+    const foundPet = mergedPets.find((p) => p.id.toString() === petId);
     if (foundPet) setPet(foundPet);
-
-    // Fetch found pets for this pet
-    const storedFoundPetsJSON = localStorage.getItem(`foundPets_${petId}`);
-    if (storedFoundPetsJSON) {
-      setFoundPets(JSON.parse(storedFoundPetsJSON));
-    }
-
-    // Fetch verified pets
-    const storedVerifiedPetsJSON = localStorage.getItem(`verifiedPets_${petId}`);
-    if (storedVerifiedPetsJSON) {
-      setVerifiedPets(JSON.parse(storedVerifiedPetsJSON));
-    }
   }, [petId]);
+  
+  
 
   const handleVerify = (foundPetId) => {
     if (verifiedPets.includes(foundPetId)) return;
@@ -88,6 +89,24 @@ const PetDescription = () => {
     if (storedPetFound === "true") {
       setIsPetFound(true);
     }
+  }, [petId]);
+
+  useEffect(() => {
+    if (!petId) return;
+  
+    const loadFoundPets = () => {
+      const storedFoundPetsJSON = localStorage.getItem(`foundPets_${petId}`);
+      setFoundPets(storedFoundPetsJSON ? JSON.parse(storedFoundPetsJSON) : []);
+    };
+  
+    loadFoundPets();
+  
+    // Listen for localStorage changes
+    window.addEventListener("storage", loadFoundPets);
+  
+    return () => {
+      window.removeEventListener("storage", loadFoundPets);
+    };
   }, [petId]);
 
 
@@ -241,7 +260,7 @@ const PetDescription = () => {
       <div className="bg-white p-6 rounded-lg shadow-md flex flex-col md:flex-row items-center w-full">
         {/* 🔹 Pet Image */}
         <img
-          src={pet?.image || "/placeholder.jpg"}
+          src={pet?.imageUrl || "/placeholder.jpg"}
           alt={pet?.name}
           className="w-32 h-32 md:w-40 md:h-40 object-cover rounded-md border"
         />
