@@ -23,7 +23,7 @@ const PetDescription = () => {
     color: "",
     lastSeen: "",
     description: "",
-    location: { lat: null, lng: null },
+    location: { lat: 0, lng: 0 },
     prizeAmount: 0,
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -141,7 +141,7 @@ const PetDescription = () => {
 
     // Reset form and close modal
     setModalOpen(false);
-    setFormData({ name: "", breed: "", color: "", lastSeen: "", description: "", location: { lat: null, lng: null }, prizeAmount: 0 });
+    setFormData({ name: "", breed: "", color: "", lastSeen: "", description: "", location: { lat: 0, lng: 0 }, prizeAmount: 0 });
     setPreviewUrl(null);
     setSelectedImage(null);
   };
@@ -183,7 +183,7 @@ const PetDescription = () => {
         mapRef.current?.flyTo({ center: [lng, lat], zoom: 14 });
 
         if (markerRef.current) markerRef.current.remove();
-        markerRef.current = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(mapRef.current);
+        markerRef.current = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(mapRef.current!);
       }
     });
 
@@ -193,7 +193,7 @@ const PetDescription = () => {
       setFormData((prev) => ({ ...prev, lastSeen: `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`, location: { lat, lng } }));
 
       if (markerRef.current) markerRef.current.remove();
-      markerRef.current = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(mapRef.current);
+      markerRef.current = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(mapRef.current!);
     });
 
     return () => {

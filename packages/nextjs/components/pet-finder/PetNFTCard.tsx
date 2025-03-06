@@ -41,8 +41,8 @@ export const PetNFTCard = ({ pet }: PetNFTCardProps) => {
         });
 
         geocoderRef.current = new MapboxGeocoder({
-            accessToken: mapboxgl.accessToken,
-            mapboxgl: mapboxgl,
+            accessToken: mapboxgl.accessToken || "",
+            mapboxgl: mapboxgl as any,
             placeholder: "Search for a location...",
             marker: false,
         });
@@ -62,7 +62,7 @@ export const PetNFTCard = ({ pet }: PetNFTCardProps) => {
                 mapRef.current?.flyTo({ center: [lng, lat], zoom: 14 });
 
                 if (markerRef.current) markerRef.current.remove();
-                markerRef.current = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(mapRef.current);
+                markerRef.current = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(mapRef.current!);
             }
         });
 
@@ -72,7 +72,7 @@ export const PetNFTCard = ({ pet }: PetNFTCardProps) => {
             setLocation({ lat, lng });
 
             if (markerRef.current) markerRef.current.remove();
-            markerRef.current = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(mapRef.current);
+            markerRef.current = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(mapRef.current!);
         });
 
         return () => {
@@ -99,8 +99,8 @@ export const PetNFTCard = ({ pet }: PetNFTCardProps) => {
             description: pet.description,
             imageUrl: pet.imageUrl,
             lastSeen,
-            latitude: parseFloat(location.lat),  // ✅ Ensure it's a number
-            longitude: parseFloat(location.lng), // ✅ Ensure it's a number
+            latitude: parseFloat(location.lat.toString()),  // ✅ Ensure it's a number
+            longitude: parseFloat(location.lng.toString()), // ✅ Ensure it's a number
             prizeAmount,
             status: "Lost"
         };
