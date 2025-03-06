@@ -99,25 +99,30 @@ contract YourContract is ERC721URIStorage {
 
     function getUserMintedPets(
         address user
-    ) external view returns (uint256[] memory) {
+    ) external view returns (Pet[] memory) {
         uint256 totalPets = nextTokenId; // Total number of minted pets
-        uint256[] memory userPets = new uint256[](totalPets);
         uint256 count = 0;
 
+        // Count the number of pets owned by the user
         for (uint256 i = 0; i < totalPets; i++) {
             if (pets[i].owner == user) {
-                userPets[count] = i;
                 count++;
             }
         }
 
-        // Resize the array to the actual number of pets owned
-        uint256[] memory result = new uint256[](count);
-        for (uint256 j = 0; j < count; j++) {
-            result[j] = userPets[j];
+        // Create an array to store pet details
+        Pet[] memory userPets = new Pet[](count);
+        uint256 index = 0;
+
+        // Populate the array with pet details
+        for (uint256 i = 0; i < totalPets; i++) {
+            if (pets[i].owner == user) {
+                userPets[index] = pets[i];
+                index++;
+            }
         }
 
-        return result;
+        return userPets;
     }
 
     function reportLost(

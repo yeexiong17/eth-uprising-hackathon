@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   534351: {
     YourContract: {
-      address: "0x851383ce95396dadc134940591154ec8e638d7ea",
+      address: "0xb99e9e9b09c4843928847e03a28fa762fe683997",
       abi: [
         {
           type: "constructor",
@@ -110,6 +110,57 @@ const deployedContracts = {
               name: "owner",
               type: "address",
               internalType: "address",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "getUserMintedPets",
+          inputs: [
+            {
+              name: "user",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "tuple[]",
+              internalType: "struct YourContract.Pet[]",
+              components: [
+                {
+                  name: "name",
+                  type: "string",
+                  internalType: "string",
+                },
+                {
+                  name: "breed",
+                  type: "string",
+                  internalType: "string",
+                },
+                {
+                  name: "color",
+                  type: "string",
+                  internalType: "string",
+                },
+                {
+                  name: "description",
+                  type: "string",
+                  internalType: "string",
+                },
+                {
+                  name: "imageURI",
+                  type: "string",
+                  internalType: "string",
+                },
+                {
+                  name: "owner",
+                  type: "address",
+                  internalType: "address",
+                },
+              ],
             },
           ],
           stateMutability: "view",
@@ -917,7 +968,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1741275251.json",
+      deploymentFile: "run-1741278085.json",
       deploymentScript: "Deploy.s.sol",
     },
   },

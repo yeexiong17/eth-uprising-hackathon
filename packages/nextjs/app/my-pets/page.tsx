@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { AuthGuard } from "~~/components/AuthGuard";
 import { MintPetModal } from "~~/components/pet-finder/MintPetModal";
 import { PetNFTCard } from "~~/components/pet-finder/PetNFTCard";
+import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 
 interface PetNFT {
     id: string;
@@ -20,6 +21,29 @@ const MyPetsPage = () => {
     const { address } = useAccount();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [myPets, setMyPets] = useState<PetNFT[]>([]);
+
+    const { data: petsData } = useScaffoldReadContract({
+        contractName: "YourContract",
+        functionName: "getUserMintedPets",
+        args: [address],
+        watch: true,
+    });
+
+    useEffect(() => {
+        if (petsData) {
+            console.log(petsData);
+            const formattedPets = petsData.map((pet, index) => ({
+                id: (index + 1).toString(),
+                name: pet.name,
+                breed: pet.breed,
+                color: pet.color,
+                description: pet.description,
+                imageUrl: pet.imageURI,
+            }));
+
+            setMyPets(formattedPets);
+        }
+    }, [petsData]);
 
     return (
         <div className="min-h-screen bg-white">
