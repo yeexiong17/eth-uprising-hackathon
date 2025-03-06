@@ -17,8 +17,8 @@ export const useYourContract = () => {
         abi: contractDetails.abi,
     });
 
-    const mintPetNFT = async (name, breed, age, imageURI) => {
-        const tx = await writeContract("mintPetNFT", [name, breed, age, imageURI]);
+    const mintPetNFT = async (name, breed, color, description, imageURI) => {
+        const tx = await writeContract("mintPetNFT", [name, breed, color, description, imageURI]);
         await tx.wait();
     };
 

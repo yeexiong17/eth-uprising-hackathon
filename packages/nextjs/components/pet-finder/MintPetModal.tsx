@@ -1,13 +1,16 @@
 import { useState } from "react";
-import { useYourContract } from "../../hooks/useContract";
-
+import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 interface MintPetModalProps {
     isOpen: boolean;
     onClose: () => void;
     onMintSuccess: (newPet: any) => void;
 }
 
+
+
 export const MintPetModal = ({ isOpen, onClose, onMintSuccess }: MintPetModalProps) => {
+    const { writeContract } = useScaffoldWriteContract({ contractName: "YourContract" });
+
     const [formData, setFormData] = useState({
         name: "",
         breed: "",
@@ -65,10 +68,13 @@ export const MintPetModal = ({ isOpen, onClose, onMintSuccess }: MintPetModalPro
                 const imageURI = `https://gateway.pinata.cloud/ipfs/${ipfsHash}`;
 
                 // Step 3: Call the smart contract to mint the NFT
-                await useYourContract.mintPetNFT(metadata); // Replace with your actual minting function
-
+                const result = await writeContract({
+                    functionName: "mintPetNFT",
+                    args: [name, breed, color, description, imageURI],
+                });
+                console.log("result", result);
                 // Step 4: Call onMintSuccess with the new pet data
-                onMintSuccess({ ...formData, image: ipfsHash });
+                // onMintSuccess({ ...formData, image: ipfsHash });
             } else {
                 console.error("Error uploading image:", data);
             }

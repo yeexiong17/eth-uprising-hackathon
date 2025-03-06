@@ -16,30 +16,10 @@ interface PetNFT {
     imageUrl: string;
 }
 
-// Sample pet NFT data
-const samplePets: PetNFT[] = [
-    {
-        id: "1",
-        name: "Max",
-        breed: "Golden Retriever",
-        color: "Golden",
-        description: "A friendly and energetic dog who loves to play fetch and swim.",
-        imageUrl: "https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=800&auto=format&fit=crop"
-    },
-    {
-        id: "2",
-        name: "Luna",
-        breed: "Siamese Cat",
-        color: "Cream & Brown",
-        description: "An elegant and vocal cat with striking blue eyes.",
-        imageUrl: "https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=800&auto=format&fit=crop"
-    },
-];
-
 const MyPetsPage = () => {
     const { address } = useAccount();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [myPets, setMyPets] = useState<PetNFT[]>(samplePets);
+    const [myPets, setMyPets] = useState<PetNFT[]>([]);
 
     return (
         <div className="min-h-screen bg-white">

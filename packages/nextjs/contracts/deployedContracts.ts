@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   534351: {
     YourContract: {
-      address: "0xaffd35d82d2e55987a7a689401baab0259be3b83",
+      address: "0x9c82860bfecd85f3eb0ab89a617c05cecfca0776",
       abi: [
         {
           type: "constructor",
@@ -92,9 +92,14 @@ const deployedContracts = {
               internalType: "string",
             },
             {
-              name: "age",
-              type: "uint256",
-              internalType: "uint256",
+              name: "color",
+              type: "string",
+              internalType: "string",
+            },
+            {
+              name: "description",
+              type: "string",
+              internalType: "string",
             },
             {
               name: "imageURI",
@@ -135,7 +140,7 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "isLost",
+          name: "lostReports",
           inputs: [
             {
               name: "",
@@ -145,9 +150,24 @@ const deployedContracts = {
           ],
           outputs: [
             {
-              name: "",
+              name: "isLost",
               type: "bool",
               internalType: "bool",
+            },
+            {
+              name: "reward",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "latitude",
+              type: "int256",
+              internalType: "int256",
+            },
+            {
+              name: "longitude",
+              type: "int256",
+              internalType: "int256",
             },
           ],
           stateMutability: "view",
@@ -167,9 +187,14 @@ const deployedContracts = {
               internalType: "string",
             },
             {
-              name: "age",
-              type: "uint256",
-              internalType: "uint256",
+              name: "color",
+              type: "string",
+              internalType: "string",
+            },
+            {
+              name: "description",
+              type: "string",
+              internalType: "string",
             },
             {
               name: "imageURI",
@@ -247,9 +272,14 @@ const deployedContracts = {
               internalType: "string",
             },
             {
-              name: "age",
-              type: "uint256",
-              internalType: "uint256",
+              name: "color",
+              type: "string",
+              internalType: "string",
+            },
+            {
+              name: "description",
+              type: "string",
+              internalType: "string",
             },
             {
               name: "imageURI",
@@ -272,6 +302,16 @@ const deployedContracts = {
               name: "tokenId",
               type: "uint256",
               internalType: "uint256",
+            },
+            {
+              name: "latitude",
+              type: "int256",
+              internalType: "int256",
+            },
+            {
+              name: "longitude",
+              type: "int256",
+              internalType: "int256",
             },
           ],
           outputs: [],
@@ -395,9 +435,14 @@ const deployedContracts = {
           ],
           outputs: [
             {
-              name: "",
-              type: "string",
-              internalType: "string",
+              name: "latitude",
+              type: "int256",
+              internalType: "int256",
+            },
+            {
+              name: "longitude",
+              type: "int256",
+              internalType: "int256",
             },
           ],
           stateMutability: "view",
@@ -486,9 +531,14 @@ const deployedContracts = {
               internalType: "uint256",
             },
             {
-              name: "location",
-              type: "string",
-              internalType: "string",
+              name: "latitude",
+              type: "int256",
+              internalType: "int256",
+            },
+            {
+              name: "longitude",
+              type: "int256",
+              internalType: "int256",
             },
           ],
           outputs: [],
@@ -653,6 +703,18 @@ const deployedContracts = {
               indexed: true,
               internalType: "uint256",
             },
+            {
+              name: "latitude",
+              type: "int256",
+              indexed: false,
+              internalType: "int256",
+            },
+            {
+              name: "longitude",
+              type: "int256",
+              indexed: false,
+              internalType: "int256",
+            },
           ],
           anonymous: false,
         },
@@ -673,10 +735,16 @@ const deployedContracts = {
               internalType: "address",
             },
             {
-              name: "location",
-              type: "string",
+              name: "latitude",
+              type: "int256",
               indexed: false,
-              internalType: "string",
+              internalType: "int256",
+            },
+            {
+              name: "longitude",
+              type: "int256",
+              indexed: false,
+              internalType: "int256",
             },
           ],
           anonymous: false,
@@ -849,7 +917,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1741272895.json",
+      deploymentFile: "run-1741275251.json",
       deploymentScript: "Deploy.s.sol",
     },
   },
