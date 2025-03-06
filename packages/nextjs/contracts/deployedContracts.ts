@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   534351: {
     YourContract: {
-      address: "0x851383ce95396dadc134940591154ec8e638d7ea",
+      address: "0xaffd35d82d2e55987a7a689401baab0259be3b83",
       abi: [
         {
           type: "constructor",
@@ -849,7 +849,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1741269448.json",
+      deploymentFile: "run-1741272895.json",
       deploymentScript: "Deploy.s.sol",
     },
   },
