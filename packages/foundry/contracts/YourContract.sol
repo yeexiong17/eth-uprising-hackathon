@@ -3,91 +3,101 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
-contract PetNFT is ERC721URIStorage {
-    uint256 private _tokenIds;
+contract PetIdentityNFT is ERC721URIStorage {
+    uint256 public nextTokenId;
+    mapping(uint256 => Pet) public pets;
+    mapping(uint256 => bool) public isLost;
+    mapping(uint256 => mapping(address => string)) public sightings;
+    mapping(uint256 => address[]) public verifications;
+    mapping(uint256 => uint256) public rewardPool;
 
     struct Pet {
         string name;
         string breed;
-        string color;
-        bool isLost;
-        string lastSeenLocation;
+        uint256 age;
+        string imageURI;
+        address owner;
     }
 
-    struct Report {
-        address reporter;
-        string imageURI; // IPFS link
-        string location;
-        uint256 timestamp;
-    }
+    event PetMinted(uint256 indexed tokenId, address owner, string name);
+    event PetReportedLost(uint256 indexed tokenId);
+    event PetSighted(uint256 indexed tokenId, address indexed user, string location);
+    event PetVerified(uint256 indexed tokenId, address indexed verifier);
+    event RewardDistributed(uint256 indexed tokenId, uint256 totalReward);
 
-    mapping(uint256 => Pet) public pets; // TokenID -> Pet details
-    mapping(uint256 => Report[]) public reports; // TokenID -> list of reports
-
-    event PetMinted(uint256 tokenId, address owner, string metadataURI);
-    event PetReportedLost(uint256 tokenId, string lastSeenLocation);
-    event PetSighted(
-        uint256 tokenId,
-        address reporter,
-        string imageURI,
-        string location
-    );
-    event PetRecovered(uint256 tokenId);
-
-    constructor() ERC721("LostPetNFT", "PET") {}
+    constructor() ERC721("Pet Identity NFT", "PETID") {}
 
     function mintPetNFT(
-        string memory metadataURI,
         string memory name,
         string memory breed,
-        string memory color
-    ) public returns (uint256) {
-        _tokenIds++;
-        uint256 newTokenId = _tokenIds;
+        uint256 age,
+        string memory imageURI
+    ) external {
+        uint256 tokenId = nextTokenId++;
+        _safeMint(msg.sender, tokenId);
+        _setTokenURI(tokenId, imageURI);
+        pets[tokenId] = Pet(name, breed, age, imageURI, msg.sender);
 
-        _mint(msg.sender, newTokenId);
-        _setTokenURI(newTokenId, metadataURI);
-
-        pets[newTokenId] = Pet(name, breed, color, false, "");
-
-        emit PetMinted(newTokenId, msg.sender, metadataURI);
-        return newTokenId;
+        emit PetMinted(tokenId, msg.sender, name);
     }
 
-    function reportPetLost(
-        uint256 tokenId,
-        string memory lastSeenLocation
-    ) public {
-        require(ownerOf(tokenId) == msg.sender, "Only owner can mark as lost");
-        pets[tokenId].isLost = true;
-        pets[tokenId].lastSeenLocation = lastSeenLocation;
-
-        emit PetReportedLost(tokenId, lastSeenLocation);
-    }
-
-    function reportPetSighted(
-        uint256 tokenId,
+    function getPetDetails(uint256 tokenId) external view returns (
+        string memory name,
+        string memory breed,
+        uint256 age,
         string memory imageURI,
-        string memory location
-    ) public {
-        require(pets[tokenId].isLost, "Pet is not marked as lost");
-
-        reports[tokenId].push(
-            Report(msg.sender, imageURI, location, block.timestamp)
-        );
-
-        emit PetSighted(tokenId, msg.sender, imageURI, location);
+        address owner
+    ) {
+        require(ownerOf(tokenId) != address(0), "Pet NFT does not exist.");
+        
+        Pet memory pet = pets[tokenId];
+        return (pet.name, pet.breed, pet.age, pet.imageURI, pet.owner);
     }
 
-    function markPetAsFound(uint256 tokenId) public {
-        require(ownerOf(tokenId) == msg.sender, "Only owner can mark as found");
-        pets[tokenId].isLost = false;
-        delete reports[tokenId]; // Clear all reports after the pet is found
+    function reportLost(uint256 tokenId) external payable {
+        require(ownerOf(tokenId) == msg.sender, "Only pet owner can report lost.");
+        require(!isLost[tokenId], "Pet is already reported lost.");
+        require(msg.value > 0, "Reward must be greater than 0.");
 
-        emit PetRecovered(tokenId);
+        isLost[tokenId] = true;
+        rewardPool[tokenId] += msg.value; // Store the ETH reward pool
+
+        emit PetReportedLost(tokenId);
     }
 
-    function getReports(uint256 tokenId) public view returns (Report[] memory) {
-        return reports[tokenId];
+
+    function updateSightings(uint256 tokenId, string memory location) external {
+        require(isLost[tokenId], "Pet is not reported lost.");
+        sightings[tokenId][msg.sender] = location;
+        emit PetSighted(tokenId, msg.sender, location);
+    }
+
+    function verifySighting(uint256 tokenId, address user) external {
+        require(ownerOf(tokenId) == msg.sender, "Only pet owner can verify.");
+        verifications[tokenId].push(user);
+        emit PetVerified(tokenId, user);
+    }
+
+    function resolveFound(uint256 tokenId) external {
+        require(ownerOf(tokenId) == msg.sender, "Only pet owner can mark as found.");
+        require(isLost[tokenId], "Pet is not lost.");
+        
+        isLost[tokenId] = false;
+        uint256 totalReward = rewardPool[tokenId];
+
+        if (verifications[tokenId].length > 0) {
+            uint256 perUserReward = totalReward / verifications[tokenId].length;
+            for (uint256 i = 0; i < verifications[tokenId].length; i++) {
+                payable(verifications[tokenId][i]).transfer(perUserReward);
+            }
+        } else {
+            // No verifications? Refund the pet owner
+            payable(msg.sender).transfer(totalReward);
+        }
+
+        rewardPool[tokenId] = 0;
+        delete verifications[tokenId];
+
+        emit RewardDistributed(tokenId, totalReward);
     }
 }

@@ -22,23 +22,44 @@ const Home = () => {
     useEffect(() => {
         const loadPetData = () => {
             try {
-                // First try to get data from localStorage
+                let allPets = [];
+    
+                // 🔥 Load stored pets from localStorage or fallback to `petData.json`
                 const storedPetsJSON = localStorage.getItem('petData');
                 if (storedPetsJSON) {
                     const storedPets = JSON.parse(storedPetsJSON);
-                    setPets(storedPets.pets);
+                    allPets = storedPets.pets;
                 } else {
-                    // If no data in localStorage, use the default petData
-                    setPets(petData.pets);
+                    allPets = petData.pets;
                 }
+    
+                // 🔥 Load lost pets from localStorage
+                const lostPetsJSON = localStorage.getItem("lostPetReports");
+                const lostPets = lostPetsJSON ? JSON.parse(lostPetsJSON) : [];
+    
+                // 🔥 Merge lost pets into the list (Only pets with valid coordinates)
+                const mergedPets = [...allPets, ...lostPets].filter(
+                    pet => pet.latitude && pet.longitude && !isNaN(pet.latitude) && !isNaN(pet.longitude)
+                );
+    
+                setPets(mergedPets);
             } catch (error) {
                 console.error('Error loading pet data:', error);
-                setPets(petData.pets); // Fallback to default data
+                setPets(petData.pets);
             }
         };
-
+    
         loadPetData();
+    
+        // 🔥 Listen for updates when a new lost pet is reported
+        window.addEventListener("lostPetUpdated", loadPetData);
+    
+        return () => {
+            window.removeEventListener("lostPetUpdated", loadPetData);
+        };
     }, []);
+    
+    
 
 
     // Add this placeholder image URL
@@ -106,21 +127,24 @@ const Home = () => {
                             }}
                         >
                             {pets.map((pet) => (
-                                <Marker
-                                    key={pet.id}
-                                    latitude={pet.latitude}
-                                    longitude={pet.longitude}
-                                    onClick={(e) => {
-                                        e.originalEvent.stopPropagation();
-                                        handleMarkerClick(pet);
-                                    }}
-                                    style={{ cursor: 'pointer' }}
-                                >
-                                    <div className="text-xl md:text-2xl transform hover:scale-110 transition-transform duration-200" title={pet.name}>
-                                        {pet.status === "Lost" ? "🔴" : "🟢"}
-                                    </div>
-                                </Marker>
-                            ))}
+    pet.latitude && pet.longitude && !isNaN(pet.latitude) && !isNaN(pet.longitude) && (
+        <Marker
+            key={pet.id}
+            latitude={pet.latitude}
+            longitude={pet.longitude}
+            onClick={(e) => {
+                e.originalEvent.stopPropagation();
+                handleMarkerClick(pet);
+            }}
+            style={{ cursor: 'pointer' }}
+        >
+            <div className="text-xl md:text-2xl transform hover:scale-110 transition-transform duration-200" title={pet.name}>
+                {pet.status === "Lost" ? "🔴" : "🟢"}
+            </div>
+        </Marker>
+    )
+))}
+
 
                             {selectedPet && (
                                 <Popup
@@ -195,13 +219,11 @@ const Home = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="grid ">
-                    
-
-                    <Link href="/uploadLostPet" className="group">
+                <div className="grid ">          
+                    <Link href="/my-pets" className="group">
                         <div className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl shadow-md p-4 md:p-8 transition-all duration-200 transform group-hover:-translate-y-1">
-                            <h3 className="text-xl md:text-2xl font-semibold mb-2 md:mb-3">Report a Pet</h3>
-                            <p className="text-green-100 text-xs md:text-sm">Help reunite lost pets with their families</p>
+                            <h3 className="text-xl md:text-2xl font-semibold mb-2 md:mb-3">Mint pet</h3>
+                            <p className="text-green-100 text-xs md:text-sm">Mint your pets now</p>
                             <div className="mt-3 md:mt-4 text-green-200 group-hover:translate-x-2 transition-transform duration-200">
                                 →
                             </div>
