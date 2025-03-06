@@ -21,7 +21,11 @@ contract PetIdentityNFT is ERC721URIStorage {
 
     event PetMinted(uint256 indexed tokenId, address owner, string name);
     event PetReportedLost(uint256 indexed tokenId);
-    event PetSighted(uint256 indexed tokenId, address indexed user, string location);
+    event PetSighted(
+        uint256 indexed tokenId,
+        address indexed user,
+        string location
+    );
     event PetVerified(uint256 indexed tokenId, address indexed verifier);
     event RewardDistributed(uint256 indexed tokenId, uint256 totalReward);
 
@@ -41,21 +45,30 @@ contract PetIdentityNFT is ERC721URIStorage {
         emit PetMinted(tokenId, msg.sender, name);
     }
 
-    function getPetDetails(uint256 tokenId) external view returns (
-        string memory name,
-        string memory breed,
-        uint256 age,
-        string memory imageURI,
-        address owner
-    ) {
+    function getPetDetails(
+        uint256 tokenId
+    )
+        external
+        view
+        returns (
+            string memory name,
+            string memory breed,
+            uint256 age,
+            string memory imageURI,
+            address owner
+        )
+    {
         require(ownerOf(tokenId) != address(0), "Pet NFT does not exist.");
-        
+
         Pet memory pet = pets[tokenId];
         return (pet.name, pet.breed, pet.age, pet.imageURI, pet.owner);
     }
 
     function reportLost(uint256 tokenId) external payable {
-        require(ownerOf(tokenId) == msg.sender, "Only pet owner can report lost.");
+        require(
+            ownerOf(tokenId) == msg.sender,
+            "Only pet owner can report lost."
+        );
         require(!isLost[tokenId], "Pet is already reported lost.");
         require(msg.value > 0, "Reward must be greater than 0.");
 
@@ -64,7 +77,6 @@ contract PetIdentityNFT is ERC721URIStorage {
 
         emit PetReportedLost(tokenId);
     }
-
 
     function updateSightings(uint256 tokenId, string memory location) external {
         require(isLost[tokenId], "Pet is not reported lost.");
@@ -79,9 +91,12 @@ contract PetIdentityNFT is ERC721URIStorage {
     }
 
     function resolveFound(uint256 tokenId) external {
-        require(ownerOf(tokenId) == msg.sender, "Only pet owner can mark as found.");
+        require(
+            ownerOf(tokenId) == msg.sender,
+            "Only pet owner can mark as found."
+        );
         require(isLost[tokenId], "Pet is not lost.");
-        
+
         isLost[tokenId] = false;
         uint256 totalReward = rewardPool[tokenId];
 

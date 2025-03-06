@@ -31,11 +31,55 @@ export const MintPetModal = ({ isOpen, onClose, onMintSuccess }: MintPetModalPro
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Here you would:
-        // 1. Upload the image to IPFS
-        // 2. Create metadata and upload to IPFS
-        // 3. Call the smart contract to mint the NFT
-        // 4. Call onMintSuccess with the new pet data
+
+        // Step 1: Upload the image to Pinata
+        const uploadData = new FormData();
+        if (formData.image) {
+            uploadData.append("file", formData.image);
+        } else {
+            console.error("No image selected for upload.");
+            return;
+        }
+
+        const pinataToken = process.env.NEXT_PUBLIC_PINATA_TOKEN; // Use the token if needed
+
+        try {
+            const response = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${pinataToken}`, // Use the Bearer token if required
+                    // Do not set Content-Type; let the browser handle it
+                },
+                body: uploadData,
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                const ipfsHash = data.IpfsHash; // Get the IPFS URL
+                console.log("Image uploaded successfully:", ipfsHash);
+ 
+                // Step 2: Prepare metadata for the NFT
+                const metadata = {
+                    name: formData.name,
+                    description: formData.description,
+                    image: `ipfs://${ipfsHash}`, // Storing image as per ERC-721 standard
+                    attributes: [
+                        { trait_type: "Breed", value: formData.breed },
+                        { trait_type: "Color", value: formData.color },
+                    ],
+                };
+
+                // Step 3: Call the smart contract to mint the NFT
+                await mintNFT(metadata); // Replace with your actual minting function
+
+                // Step 4: Call onMintSuccess with the new pet data
+                onMintSuccess({ ...formData, image: ipfsHash });
+            } else {
+                console.error("Error uploading image:", data);
+            }
+        } catch (error) {
+            console.error("Error uploading to Pinata:", error);
+        }
     };
 
     if (!isOpen) return null;
@@ -97,7 +141,7 @@ export const MintPetModal = ({ isOpen, onClose, onMintSuccess }: MintPetModalPro
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Pet Name</label>
                                 <input
                                     type="text"
-                                    className="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                                    className="w-full px-2.5 py-1.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     required
@@ -108,7 +152,7 @@ export const MintPetModal = ({ isOpen, onClose, onMintSuccess }: MintPetModalPro
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Breed</label>
                                 <input
                                     type="text"
-                                    className="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                                    className="w-full px-2.5 py-1.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
                                     value={formData.breed}
                                     onChange={(e) => setFormData({ ...formData, breed: e.target.value })}
                                     required
@@ -119,7 +163,7 @@ export const MintPetModal = ({ isOpen, onClose, onMintSuccess }: MintPetModalPro
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Color</label>
                                 <input
                                     type="text"
-                                    className="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                                    className="w-full px-2.5 py-1.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
                                     value={formData.color}
                                     onChange={(e) => setFormData({ ...formData, color: e.target.value })}
                                     required
@@ -129,7 +173,7 @@ export const MintPetModal = ({ isOpen, onClose, onMintSuccess }: MintPetModalPro
                             <div className="col-span-2">
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
                                 <textarea
-                                    className="w-full px-2.5 py-1.5 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                                    className="w-full px-2.5 py-1.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
                                     rows={2}
                                     value={formData.description}
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}

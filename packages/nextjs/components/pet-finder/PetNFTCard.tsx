@@ -85,12 +85,12 @@ export const PetNFTCard = ({ pet }: PetNFTCardProps) => {
             alert("Please select a valid location on the map.");
             return;
         }
-    
+
         if (!prizeAmount) {
             alert("Please enter a prize amount.");
             return;
         }
-    
+
         const lostPetReport = {
             id: pet.id,
             name: pet.name,
@@ -104,22 +104,22 @@ export const PetNFTCard = ({ pet }: PetNFTCardProps) => {
             prizeAmount,
             status: "Lost"
         };
-    
+
         // 🔥 Save lost pet reports in localStorage
         const storedReports = localStorage.getItem("lostPetReports");
         const reports = storedReports ? JSON.parse(storedReports) : [];
         reports.push(lostPetReport);
         localStorage.setItem("lostPetReports", JSON.stringify(reports));
-    
+
         alert("Lost pet report submitted successfully!");
-    
+
         // 🔥 Notify home page to refresh map markers
         window.dispatchEvent(new Event("lostPetUpdated"));
-    
+
         setIsReportModalOpen(false);
     };
-    
-    
+
+
 
     return (
         <>
@@ -146,13 +146,23 @@ export const PetNFTCard = ({ pet }: PetNFTCardProps) => {
             {isReportModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
                     <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
-                        <h3 className="text-lg font-bold mb-4">Report Lost Location</h3>
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-bold text-gray-900">Report Lost Location</h3>
+                            <button
+                                onClick={() => setIsReportModalOpen(false)}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
                         <div id="geocoder-container" className="mb-2"></div>
                         <input
                             type="text"
                             value={lastSeen}
                             readOnly
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                         />
                         <div className="mt-2 h-48 border border-gray-300 rounded-md overflow-hidden">
                             <div ref={mapContainerRef} className="w-full h-full"></div>
@@ -164,7 +174,7 @@ export const PetNFTCard = ({ pet }: PetNFTCardProps) => {
                             step="0.01"
                             value={prizeAmount}
                             onChange={(e) => setPrizeAmount(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                             placeholder="Enter reward amount"
                         />
 
