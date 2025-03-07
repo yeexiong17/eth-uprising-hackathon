@@ -1,45 +1,63 @@
-type Approval @entity(immutable: true) {
-  id: Bytes!
-  owner: Bytes! # address
-  approved: Bytes! # address
-  tokenId: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
+type Pet @entity {
+  id: ID!
+  tokenId: BigInt!
+  name: String!
+  breed: String!
+  color: String!
+  description: String!
+  imageURI: String!
+  owner: Bytes!
+  isLost: Boolean!
+  currentLostReport: LostReport
+  sightings: [Sighting!]! @derivedFrom(field: "pet")
+  createdAt: BigInt!
+  updatedAt: BigInt!
+  reward: BigInt!
 }
 
-type ApprovalForAll @entity(immutable: true) {
-  id: Bytes!
-  owner: Bytes! # address
-  operator: Bytes! # address
-  approved: Boolean! # bool
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
+type LostReport @entity {
+  id: ID!
+  pet: Pet!
+  tokenId: BigInt!
+  isLost: Boolean!
+  reward: BigInt!
+  latitude: BigInt!
+  longitude: BigInt!
+  reportedAt: BigInt!
+  resolvedAt: BigInt
+  sightings: [Sighting!]! @derivedFrom(field: "lostReport")
 }
 
-type BatchMetadataUpdate @entity(immutable: true) {
-  id: Bytes!
-  _fromTokenId: BigInt! # uint256
-  _toTokenId: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
+type Sighting @entity {
+  id: ID!
+  pet: Pet!
+  lostReport: LostReport
+  tokenId: BigInt!
+  spotter: Bytes!
+  latitude: BigInt!
+  longitude: BigInt!
+  description: String!
+  imageURI: String!
+  isVerified: Boolean!
+  verifiedBy: Bytes
+  verifiedAt: BigInt
+  createdAt: BigInt!
 }
 
-type MetadataUpdate @entity(immutable: true) {
-  id: Bytes!
-  _tokenId: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
+type RewardDistribution @entity {
+  id: ID!
+  pet: Pet!
+  tokenId: BigInt!
+  totalReward: BigInt!
+  distributedAt: BigInt!
+  recipients: [Bytes!]!
 }
 
 type PetMinted @entity(immutable: true) {
   id: Bytes!
-  tokenId: BigInt! # uint256
-  owner: Bytes! # address
-  name: String! # string
+  tokenId: BigInt!
+  owner: Bytes!
+  name: String!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -47,9 +65,9 @@ type PetMinted @entity(immutable: true) {
 
 type PetReportedLost @entity(immutable: true) {
   id: Bytes!
-  tokenId: BigInt! # uint256
-  latitude: BigInt! # int256
-  longitude: BigInt! # int256
+  tokenId: BigInt!
+  latitude: BigInt!
+  longitude: BigInt!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -57,10 +75,10 @@ type PetReportedLost @entity(immutable: true) {
 
 type PetSighted @entity(immutable: true) {
   id: Bytes!
-  tokenId: BigInt! # uint256
-  user: Bytes! # address
-  latitude: BigInt! # int256
-  longitude: BigInt! # int256
+  tokenId: BigInt!
+  user: Bytes!
+  latitude: BigInt!
+  longitude: BigInt!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -68,8 +86,8 @@ type PetSighted @entity(immutable: true) {
 
 type PetVerified @entity(immutable: true) {
   id: Bytes!
-  tokenId: BigInt! # uint256
-  verifier: Bytes! # address
+  tokenId: BigInt!
+  verifier: Bytes!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -77,18 +95,8 @@ type PetVerified @entity(immutable: true) {
 
 type RewardDistributed @entity(immutable: true) {
   id: Bytes!
-  tokenId: BigInt! # uint256
-  totalReward: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type SightingVerified @entity(immutable: true) {
-  id: Bytes!
-  tokenId: BigInt! # uint256
-  sightingId: BigInt! # uint256
-  verifier: Bytes! # address
+  tokenId: BigInt!
+  totalReward: BigInt!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -96,9 +104,9 @@ type SightingVerified @entity(immutable: true) {
 
 type Transfer @entity(immutable: true) {
   id: Bytes!
-  from: Bytes! # address
-  to: Bytes! # address
-  tokenId: BigInt! # uint256
+  from: Bytes!
+  to: Bytes!
+  tokenId: BigInt!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!

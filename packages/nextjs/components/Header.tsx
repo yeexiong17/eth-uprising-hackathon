@@ -24,11 +24,6 @@ export const menuLinks: HeaderMenuLink[] = [
     label: "My Pets",
     href: "/my-pets",
   },
-  {
-    label: "Debug Contracts",
-    href: "/debug",
-    icon: <BugAntIcon className="h-4 w-4" />,
-  },
 ];
 
 export const HeaderMenuLinks = () => {

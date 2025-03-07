@@ -16,29 +16,16 @@ dataSources:
       apiVersion: 0.0.9
       language: wasm/assemblyscript
       entities:
-        - Approval
-        - ApprovalForAll
-        - BatchMetadataUpdate
-        - MetadataUpdate
         - PetMinted
         - PetReportedLost
         - PetSighted
         - PetVerified
         - RewardDistributed
-        - SightingVerified
         - Transfer
       abis:
         - name: YourContract
           file: ./abis/YourContract.json
       eventHandlers:
-        - event: Approval(indexed address,indexed address,indexed uint256)
-          handler: handleApproval
-        - event: ApprovalForAll(indexed address,indexed address,bool)
-          handler: handleApprovalForAll
-        - event: BatchMetadataUpdate(uint256,uint256)
-          handler: handleBatchMetadataUpdate
-        - event: MetadataUpdate(uint256)
-          handler: handleMetadataUpdate
         - event: PetMinted(indexed uint256,address,string)
           handler: handlePetMinted
         - event: PetReportedLost(indexed uint256,int256,int256)
@@ -49,8 +36,6 @@ dataSources:
           handler: handlePetVerified
         - event: RewardDistributed(indexed uint256,uint256)
           handler: handleRewardDistributed
-        - event: SightingVerified(indexed uint256,uint256,address)
-          handler: handleSightingVerified
         - event: Transfer(indexed address,indexed address,indexed uint256)
           handler: handleTransfer
       file: ./src/your-contract.ts

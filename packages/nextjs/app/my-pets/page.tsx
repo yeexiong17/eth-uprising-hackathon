@@ -25,11 +25,11 @@ const MyPetsPage = () => {
   const { data: petsData, isLoading } = useUserMintedPets(address || "");
 
   useEffect(() => {
-    console.log(petsData)
+    console.log('Raw pets data:', petsData);
     if (!isLoading && petsData?.pets) {
-      console.log('User pets data:', petsData);
+      console.log('User pets data:', petsData.pets);
       const formattedPets = petsData.pets.map((pet: Pet) => ({
-        tokenId: pet.tokenId,
+        tokenId: pet.tokenId.toString(),
         name: pet.name,
         breed: pet.breed,
         color: pet.color,
@@ -37,6 +37,7 @@ const MyPetsPage = () => {
         imageURI: pet.imageURI,
       }));
 
+      console.log('Formatted pets:', formattedPets);
       setMyPets(formattedPets);
     }
   }, [petsData, isLoading]);

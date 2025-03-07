@@ -23,19 +23,17 @@ async function fetchGraphQL(query: string, variables = {}) {
 
 const GET_ALL_LOST_PETS = `
   query GetAllLostPets {
-    pets {
+    pets(where: { isLost: true }) {
       id
       tokenId
       name
       breed
       color
       description
-      imageUrl
-      latitude
-      longitude
+      imageURI
+      owner
       isLost
       reward
-      owner
     }
   }
 `;
@@ -61,12 +59,10 @@ const GET_LOST_PET = `
       breed
       color
       description
-      imageUrl
-      latitude
-      longitude
+      imageURI
+      owner
       isLost
       reward
-      owner
     }
   }
 `;
@@ -83,14 +79,14 @@ const GET_PET_SIGHTINGS = `
   query GetPetSightings($petId: ID!) {
     sightings(where: { pet: $petId }) {
       id
-      sightingId
-      user
+      tokenId
+      spotter
       latitude
       longitude
       description
-      imageUrl
+      imageURI
       isVerified
-      timestamp
+      createdAt
     }
   }
 `;
@@ -112,10 +108,11 @@ export interface Pet {
   description: string;
   imageURI: string;
   isLost: boolean;
+  owner: string;
 }
 
 const GET_USER_MINTED_PETS = `
-  query GetUserMintedPets($userAddress: String!) {
+  query GetUserMintedPets($userAddress: Bytes!) {
     pets(where: { owner: $userAddress }) {
       id
       tokenId
@@ -124,7 +121,6 @@ const GET_USER_MINTED_PETS = `
       color
       description
       imageURI
-      isLost
     }
   }
 `;
@@ -133,10 +129,18 @@ export function useUserMintedPets(userAddress: string) {
   return useQuery({
     queryKey: ['userPets', userAddress],
     queryFn: async () => {
+      if (!userAddress) return { pets: [] };
+
       try {
-        const response = await fetchGraphQL(GET_USER_MINTED_PETS, { userAddress });
+        // Convert address to lowercase to match The Graph's format
+        const formattedAddress = userAddress.toLowerCase();
+        console.log('Querying for address:', formattedAddress);
+
+        const response = await fetchGraphQL(GET_USER_MINTED_PETS, { userAddress: formattedAddress });
+        console.log('GraphQL Response:', response);
         return response || { pets: [] };
       } catch (error) {
+        console.error('Error fetching user pets:', error);
         return { pets: [] };
       }
     },
