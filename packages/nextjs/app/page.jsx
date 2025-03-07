@@ -71,7 +71,7 @@ const PublicPage = () => {
               <p className="text-gray-600">Owner can verify the pet based on sighting report from other users</p>
             </div>
             <div className="text-center">
-              <div className="text-4xl mb-4">🏠</div>
+              <div className="text-4xl mb-4">💎</div>
               <h3 className="text-xl font-semibold mb-2">Incentive-based System</h3>
               <p className="text-gray-600">Users can earn rewards for making correct sighting reports</p>
             </div>
