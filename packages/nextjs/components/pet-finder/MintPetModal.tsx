@@ -7,7 +7,7 @@ interface MintPetModalProps {
 }
 
 export const MintPetModal = function MintPetModal({ isOpen, onClose }: MintPetModalProps) {
-    const { writeContract } = useScaffoldWriteContract({ contractName: "YourContract" });
+    const { writeContractAsync: writeYourContractAsync } = useScaffoldWriteContract({ contractName: "YourContract" });
 
     const [formData, setFormData] = useState({
         name: "",
@@ -66,7 +66,7 @@ export const MintPetModal = function MintPetModal({ isOpen, onClose }: MintPetMo
                 const imageURI = `https://gateway.pinata.cloud/ipfs/${ipfsHash}`;
 
                 // Step 3: Call the smart contract to mint the NFT
-                const result = await writeContract({
+                const result = await writeYourContractAsync({
                     functionName: "mintPetNFT",
                     args: [name, breed, color, description, imageURI],
                 });

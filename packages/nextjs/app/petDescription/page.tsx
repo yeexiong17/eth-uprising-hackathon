@@ -40,7 +40,7 @@ interface FoundPets {
 }
 
 const PetDescription = () => {
-  const { writeContract } = useScaffoldWriteContract({ contractName: "YourContract" });
+  const { writeContractAsync: writeYourContractAsync } = useScaffoldWriteContract({ contractName: "YourContract" });
   const { address: account } = useAccount();
   const searchParams = useSearchParams();
   const petId = searchParams.get("id");
@@ -133,7 +133,7 @@ const PetDescription = () => {
   const handleVerify = async (isVerified: boolean, sightingId: number) => {
     if (isVerified) return;
 
-    const result = await writeContract({
+    const result = await writeYourContractAsync({
       functionName: "verifySighting",
       args: [BigInt(petId!), BigInt(sightingId)],
     });
@@ -149,15 +149,13 @@ const PetDescription = () => {
     alert("Are you sure you want to distribute the reward?");
 
     try {
-      const result = await writeContract({
+      const result = await writeYourContractAsync({
         functionName: "resolveFound",
         args: [BigInt(petId!)],
       });
       console.log("result", result);
-      alert(`Reward has been distributed to each verified user!`);
-
-      // Route to /home after successful distribution
       router.push("/home");
+      alert(`Reward has been distributed to each verified user!`);
     } catch (error) {
       console.error("Error distributing rewards:", error);
     }
@@ -276,13 +274,11 @@ const PetDescription = () => {
         const longitude = Math.floor(formData.location.lng * 100000); // Convert to integer
 
         // Step 3: Call the smart contract to mint the NFT
-        const result = await writeContract({
+        const result = await writeYourContractAsync({
           functionName: "updateSightings",
           args: [BigInt(petId!), BigInt(latitude), BigInt(longitude), description, imageURI],
         });
         console.log("result", result);
-        // Step 4: Call onMintSuccess with the new pet data
-        router.push("/home");
       } else {
         console.error("Error uploading image:", data);
       }

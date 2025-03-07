@@ -13,7 +13,7 @@ const PublicPage = () => {
       <div className="bg-white shadow-md">
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-            Welcome to Pet Finder
+            Welcome to PawChain
           </h1>
           <p className="text-xl text-gray-600 mb-8">
             Helping lost pets find their way back home
@@ -67,13 +67,13 @@ const PublicPage = () => {
             </div>
             <div className="text-center">
               <div className="text-4xl mb-4">🔍</div>
-              <h3 className="text-xl font-semibold mb-2">Connect</h3>
-              <p className="text-gray-600">Our system matches lost and found reports</p>
+              <h3 className="text-xl font-semibold mb-2">Pet Verification</h3>
+              <p className="text-gray-600">Owner can verify the pet based on sighting report from other users</p>
             </div>
             <div className="text-center">
-              <div className="text-4xl mb-4">🏠</div>
-              <h3 className="text-xl font-semibold mb-2">Reunite</h3>
-              <p className="text-gray-600">Help pets return to their loving homes</p>
+              <div className="text-4xl mb-4">💎</div>
+              <h3 className="text-xl font-semibold mb-2">Incentive-based System</h3>
+              <p className="text-gray-600">Users can earn rewards for making correct sighting reports</p>
             </div>
           </div>
         </div>
