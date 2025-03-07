@@ -1,0 +1,18 @@
+{
+  "name": "pets_lost_and_found",
+  "license": "UNLICENSED",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ pets_lost_and_found",
+    "create-local": "graph create --node http://localhost:8020/ pets_lost_and_found",
+    "remove-local": "graph remove --node http://localhost:8020/ pets_lost_and_found",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 pets_lost_and_found",
+    "test": "graph test"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.96.0",
+    "@graphprotocol/graph-ts": "0.37.0"
+  },
+  "devDependencies": { "matchstick-as": "0.6.0" }
+}
