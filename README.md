@@ -1,80 +1,305 @@
-# 🏗 Scaffold-ETH 2
+# 🐾 PawChain - Decentralized Pet Recovery System
 
-<h4 align="center">
-  <a href="https://docs.scaffoldeth.io">Documentation</a> |
-  <a href="https://scaffoldeth.io">Website</a>
-</h4>
+PawChain leverages Scroll's zk-rollup technology to provide a scalable, cost-efficient, and secure solution for pet identification, ownership verification, and lost & found tracking. Built on Scroll's Layer 2 solution, PawChain ensures minimal transaction costs while maintaining Ethereum's security guarantees.
 
-🧪 An open-source, up-to-date toolkit for building decentralized applications (dapps) on the Ethereum blockchain. It's designed to make it easier for developers to create and deploy smart contracts and build user interfaces that interact with those contracts.
+## 🌟 Key Features
 
-⚙️ Built using NextJS, RainbowKit, Foundry, Wagmi, Viem, and Typescript.
+- **🚀 Pet NFTs as Digital Identities**
+  - Soulbound NFTs for immutable proof of ownership
+  - Tamper-proof pet identification
+  - Permanent record of pet history
 
-- ✅ **Contract Hot Reload**: Your frontend auto-adapts to your smart contract as you edit it.
-- 🪝 **[Custom hooks](https://docs.scaffoldeth.io/hooks/)**: Collection of React hooks wrapper around [wagmi](https://wagmi.sh/) to simplify interactions with smart contracts with typescript autocompletion.
-- 🧱 [**Components**](https://docs.scaffoldeth.io/components/): Collection of common web3 components to quickly build your frontend.
-- 🔥 **Burner Wallet & Local Faucet**: Quickly test your application with a burner wallet and local faucet.
-- 🔐 **Integration with Wallet Providers**: Connect to different wallet providers and interact with the Ethereum network.
+- **🔗 Trustless Reward System**
+  - Automated smart contract payouts
+  - Verified finder rewards
+  - Transparent transaction history
 
-![Debug Contracts tab](https://github.com/scaffold-eth/scaffold-eth-2/assets/55535804/b237af0c-5027-4849-a5c1-2e31495cccb1)
+- **🌍 Community-Driven Recovery**
+  - Decentralized lost & found reports
+  - Shelter integration
+  - Real-time pet status updates
 
-## Requirements
+- **💰 Gas-Efficient Operations**
+  - Optimized for Scroll's zkEVM
+  - Low-cost NFT minting
+  - Affordable transaction processing
 
-Before you begin, you need to install the following tools:
+- **⚡ Scalability & Performance**
+  - Fast finality for real-time updates
+  - Seamless user experience
+  - Enterprise-grade reliability
 
-- [Node (>= v20.18.3)](https://nodejs.org/en/download/)
-- Yarn ([v1](https://classic.yarnpkg.com/en/docs/install/) or [v2+](https://yarnpkg.com/getting-started/install))
-- [Git](https://git-scm.com/downloads)
+## 📊 The Graph Integration
 
-## Quickstart
+PawChain leverages The Graph's subgraphs for efficient data indexing and retrieval, ensuring real-time access to on-chain pet data:
 
-To get started with Scaffold-ETH 2, follow the steps below:
+- **🔹 Pet NFTs Subgraph**
+  - Indexes all minted pet NFTs
+  - Tracks ownership history
+  - Stores detailed pet metadata
+  - [View Subgraph](your-pet-nfts-subgraph-link)
 
-1. Install dependencies if it was skipped in CLI:
+- **🔹 Lost & Found Reports Subgraph**
+  - Real-time lost pet case tracking
+  - Found pet report indexing
+  - Geographic location mapping
+  - [View Subgraph](your-lost-found-subgraph-link)
 
+- **🔹 Verified Recoveries Subgraph**
+  - Records successful pet recoveries
+  - Tracks reward distributions
+  - Stores finder verification data
+  - [View Subgraph](your-recoveries-subgraph-link)
+
+### Subgraph Deployment Details
+
+- **Deployment Network**: Scroll Sepolia
+- **Graph Explorer**: [View on The Graph Explorer](your-graph-explorer-link)
+- **Subgraph Endpoints**:
+  ```
+  Pet NFTs: https://api.thegraph.com/subgraphs/name/your-username/pet-nfts
+  Lost & Found: https://api.thegraph.com/subgraphs/name/your-username/lost-found
+  Recoveries: https://api.thegraph.com/subgraphs/name/your-username/recoveries
+  ```
+
+## 🔧 Technical Stack
+
+- **Frontend**: 
+  - Next.js
+  - RainbowKit
+  - Wagmi
+  - Apollo Client (for GraphQL queries)
+
+- **Backend & Data**:
+  - The Graph Protocol
+  - GraphQL
+  - Subgraph Indexing
+
+- **Smart Contracts**: 
+  - Solidity
+  - Foundry
+
+- **Network**: 
+  - Scroll Sepolia Testnet
+
+- **Tools**: 
+  - TypeScript
+  - Viem
+  - Graph CLI
+
+## 📦 Prerequisites
+
+Before you begin, ensure you have installed:
+- [Node.js](https://nodejs.org/) (>= v20.18.3)
+- [Yarn](https://yarnpkg.com/) (v1 or v2+)
+- [Git](https://git-scm.com/)
+
+## 🚀 Quick Start
+
+1. **Clone the Repository**
+```bash
+git clone https://github.com/yeexiong17/eth-uprising-hackathon.git
+cd eth-uprising-hackathon
 ```
-cd my-dapp-example
+
+2. **Install Dependencies**
+```bash
 yarn install
 ```
 
-2. Run a local network in the first terminal:
+3. **Environment Setup**
+```bash
+# Copy environment files
+cp packages/foundry/.env.example packages/foundry/.env
+cp packages/nextjs/.env.example packages/nextjs/.env
 
+# Configure your environment variables
+# packages/foundry/.env
+PRIVATE_KEY=your_wallet_private_key
+ALCHEMY_API_KEY=your_alchemy_api_key
+ETHERSCAN_API_KEY=your_etherscan_api_key
+
+# packages/nextjs/.env
+NEXT_PUBLIC_ALCHEMY_API_KEY=your_alchemy_api_key
+NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_walletconnect_project_id
 ```
-yarn chain
+
+4. **Deploy Subgraphs**
+```bash
+# Install Graph CLI
+npm install -g @graphprotocol/graph-cli
+
+# Initialize subgraph
+cd subgraph
+yarn install
+
+# Generate types
+yarn codegen
+
+# Deploy subgraphs
+yarn deploy:pet-nfts
+yarn deploy:lost-found
+yarn deploy:recoveries
 ```
 
-This command starts a local Ethereum network using Foundry. The network runs on your local machine and can be used for testing and development. You can customize the network configuration in `packages/foundry/foundry.toml`.
-
-3. On a second terminal, deploy the test contract:
-
-```
-yarn deploy
+5. **Deploy Smart Contracts**
+```bash
+yarn deploy --network scrollSepolia
 ```
 
-This command deploys a test smart contract to the local network. The contract is located in `packages/foundry/contracts` and can be modified to suit your needs. The `yarn deploy` command uses the deploy script located in `packages/foundry/script` to deploy the contract to the network. You can also customize the deploy script.
-
-4. On a third terminal, start your NextJS app:
-
-```
+6. **Start the Frontend**
+```bash
 yarn start
 ```
 
-Visit your app on: `http://localhost:3000`. You can interact with your smart contract using the `Debug Contracts` page. You can tweak the app config in `packages/nextjs/scaffold.config.ts`.
+## 📊 Querying Subgraphs
 
-Run smart contract test with `yarn foundry:test`
+Example GraphQL queries for common operations:
 
-- Edit your smart contracts in `packages/foundry/contracts`
-- Edit your frontend homepage at `packages/nextjs/app/page.tsx`. For guidance on [routing](https://nextjs.org/docs/app/building-your-application/routing/defining-routes) and configuring [pages/layouts](https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts) checkout the Next.js documentation.
-- Edit your deployment scripts in `packages/foundry/script`
+```graphql
+# Query Pet NFT Details
+query getPetNFT($tokenId: ID!) {
+  pet(id: $tokenId) {
+    id
+    owner
+    metadata
+    createdAt
+  }
+}
 
+# Query Lost Pet Reports
+query getLostPets($first: Int!) {
+  lostPetReports(first: $first, orderBy: createdAt, orderDirection: desc) {
+    id
+    petId
+    location
+    status
+  }
+}
 
-## Documentation
+# Query Verified Recoveries
+query getRecoveries($finder: String!) {
+  recoveries(where: { finder: $finder }) {
+    id
+    petId
+    reward
+    timestamp
+  }
+}
+```
 
-Visit our [docs](https://docs.scaffoldeth.io) to learn how to start building with Scaffold-ETH 2.
+## 📦 Project Structure
 
-To know more about its features, check out our [website](https://scaffoldeth.io).
+```
+pawchain/
+├── packages/
+│   ├── foundry/          # Smart contracts
+│   ├── nextjs/           # Frontend application
+│   └── subgraph/         # The Graph subgraphs
+│       ├── pet-nfts/
+│       ├── lost-found/
+│       └── recoveries/
+```
 
-## Contributing to Scaffold-ETH 2
+## 🔍 Contract Details
 
-We welcome contributions to Scaffold-ETH 2!
+- **Network**: Scroll Sepolia Testnet
+- **Contract Address**: 0xDD279fA4138C7213Eb78ab12D04ddA16a9E8A0D4
+- **ScrollScan Link**: [Your ScrollScan Link]
 
-Please see [CONTRIBUTING.MD](https://github.com/scaffold-eth/scaffold-eth-2/blob/main/CONTRIBUTING.md) for more information and guidelines for contributing to Scaffold-ETH 2.
+## 🧪 Testing
+
+```bash
+# Run contract tests
+cd packages/foundry
+yarn test
+
+# Run frontend tests
+cd packages/nextjs
+yarn test
+```
+
+## 🌐 Network Configuration
+
+PawChain is deployed on Scroll Sepolia testnet with the following configuration:
+- **RPC URL**: https://sepolia-rpc.scroll.io
+- **Chain ID**: 534351
+- **Network Name**: scrollSepolia
+
+## 🎯 Getting Testnet ETH
+
+1. Visit [Scroll Sepolia Faucet](https://sepolia.scroll.io/faucet)
+2. Connect your wallet
+3. Request test ETH for development and testing
+
+## 📚 Development Commands
+
+```bash
+# Start local blockchain
+yarn chain
+
+# Deploy contracts
+yarn deploy
+
+# Start frontend
+yarn start
+
+# Run tests
+yarn test
+
+# Verify contracts
+yarn verify
+
+# Subgraph Commands
+cd packages/subgraph
+
+# Generate types
+yarn codegen
+
+# Deploy subgraphs
+yarn deploy:pet-nfts
+yarn deploy:lost-found
+yarn deploy:recoveries
+
+# Create local subgraph
+yarn create-local
+
+# Remove local subgraph
+yarn remove-local
+```
+
+## 🤝 Contributing
+
+We welcome contributions! Please follow these steps:
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Built with [Scaffold-ETH 2](https://github.com/scaffold-eth/scaffold-eth-2)
+- Powered by [Scroll](https://scroll.io/)
+- Supported by the Ethereum community
+
+## 🤔 Support
+
+For support, please join our [Discord Community](your-discord-link) or open a GitHub issue.
+
+## 🔍 Verification & Deployment Links
+
+- **Smart Contract**
+  - Network: Scroll Sepolia Testnet
+  - Contract Address: [Your Contract Address]
+  - ScrollScan Link: [Your ScrollScan Link]
+
+- **Subgraphs**
+  - Pet NFTs: [Graph Explorer Link]
+  - Lost & Found: [Graph Explorer Link]
+  - Recoveries: [Graph Explorer Link]
