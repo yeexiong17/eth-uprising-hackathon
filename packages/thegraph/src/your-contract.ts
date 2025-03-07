@@ -1,189 +1,140 @@
 import {
-  Approval as ApprovalEvent,
-  ApprovalForAll as ApprovalForAllEvent,
-  BatchMetadataUpdate as BatchMetadataUpdateEvent,
-  MetadataUpdate as MetadataUpdateEvent,
   PetMinted as PetMintedEvent,
   PetReportedLost as PetReportedLostEvent,
   PetSighted as PetSightedEvent,
   PetVerified as PetVerifiedEvent,
   RewardDistributed as RewardDistributedEvent,
-  SightingVerified as SightingVerifiedEvent,
-  Transfer as TransferEvent
+  YourContract
 } from "../generated/YourContract/YourContract"
 import {
-  Approval,
-  ApprovalForAll,
-  BatchMetadataUpdate,
-  MetadataUpdate,
-  PetMinted,
-  PetReportedLost,
-  PetSighted,
-  PetVerified,
-  RewardDistributed,
-  SightingVerified,
-  Transfer
+  Pet,
+  LostReport,
+  Sighting,
+  RewardDistribution
 } from "../generated/schema"
-
-export function handleApproval(event: ApprovalEvent): void {
-  let entity = new Approval(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.owner = event.params.owner
-  entity.approved = event.params.approved
-  entity.tokenId = event.params.tokenId
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
-}
-
-export function handleApprovalForAll(event: ApprovalForAllEvent): void {
-  let entity = new ApprovalForAll(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.owner = event.params.owner
-  entity.operator = event.params.operator
-  entity.approved = event.params.approved
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
-}
-
-export function handleBatchMetadataUpdate(
-  event: BatchMetadataUpdateEvent
-): void {
-  let entity = new BatchMetadataUpdate(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity._fromTokenId = event.params._fromTokenId
-  entity._toTokenId = event.params._toTokenId
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
-}
-
-export function handleMetadataUpdate(event: MetadataUpdateEvent): void {
-  let entity = new MetadataUpdate(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity._tokenId = event.params._tokenId
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
-}
+import { BigInt } from "@graphprotocol/graph-ts"
 
 export function handlePetMinted(event: PetMintedEvent): void {
-  let entity = new PetMinted(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.tokenId = event.params.tokenId
-  entity.owner = event.params.owner
-  entity.name = event.params.name
+  let pet = new Pet(event.params.tokenId.toString())
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  // Load contract to get additional pet details
+  let contract = YourContract.bind(event.address)
+  let petData = contract.pets(event.params.tokenId)
 
-  entity.save()
+  pet.tokenId = event.params.tokenId
+  pet.name = petData.getName()
+  pet.breed = petData.getBreed()
+  pet.color = petData.getColor()
+  pet.description = petData.getDescription()
+  pet.imageURI = petData.getImageURI()
+  pet.owner = petData.getOwner()
+  pet.isLost = false
+  pet.createdAt = event.block.timestamp
+  pet.updatedAt = event.block.timestamp
+
+  pet.save()
 }
 
 export function handlePetReportedLost(event: PetReportedLostEvent): void {
-  let entity = new PetReportedLost(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.tokenId = event.params.tokenId
-  entity.latitude = event.params.latitude
-  entity.longitude = event.params.longitude
+  let id = event.transaction.hash.concatI32(event.logIndex.toI32()).toHexString()
+  let lostReport = new LostReport(id)
+  let pet = Pet.load(event.params.tokenId.toString())
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  if (pet) {
+    pet.isLost = true
+    pet.updatedAt = event.block.timestamp
+    pet.currentLostReport = id
+    pet.save()
+  }
 
-  entity.save()
+  let contract = YourContract.bind(event.address)
+  let rewardAmount = contract.rewardPool(event.params.tokenId)
+
+  lostReport.pet = event.params.tokenId.toString()
+  lostReport.tokenId = event.params.tokenId
+  lostReport.isLost = true
+  lostReport.reward = rewardAmount
+  lostReport.latitude = event.params.latitude
+  lostReport.longitude = event.params.longitude
+  lostReport.reportedAt = event.block.timestamp
+
+  lostReport.save()
 }
 
 export function handlePetSighted(event: PetSightedEvent): void {
-  let entity = new PetSighted(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.tokenId = event.params.tokenId
-  entity.user = event.params.user
-  entity.latitude = event.params.latitude
-  entity.longitude = event.params.longitude
+  let id = event.transaction.hash.concatI32(event.logIndex.toI32()).toHexString()
+  let sighting = new Sighting(id)
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  // Get contract instance to fetch sighting details
+  let contract = YourContract.bind(event.address)
+  let sightingData = contract.sightingList(event.params.tokenId, BigInt.fromI32(event.params.user.toI32()))
 
-  entity.save()
+  sighting.pet = event.params.tokenId.toString()
+  sighting.tokenId = event.params.tokenId
+  sighting.spotter = event.params.user
+  sighting.latitude = event.params.latitude
+  sighting.longitude = event.params.longitude
+  sighting.description = sightingData.getSighting().description
+  sighting.imageURI = sightingData.getSighting().imageURI
+  sighting.isVerified = false
+  sighting.createdAt = event.block.timestamp
+
+  // Link to current lost report
+  let pet = Pet.load(event.params.tokenId.toString())
+  if (pet && pet.currentLostReport) {
+    sighting.lostReport = pet.currentLostReport
+  }
+
+  sighting.save()
 }
 
 export function handlePetVerified(event: PetVerifiedEvent): void {
-  let entity = new PetVerified(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.tokenId = event.params.tokenId
-  entity.verifier = event.params.verifier
+  let pet = Pet.load(event.params.tokenId.toString())
+  if (!pet) return
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  // Update all unverified sightings by this verifier
+  let contract = YourContract.bind(event.address)
+  let sightings = contract.getSightings(event.params.tokenId)
 
-  entity.save()
+  for (let i = 0; i < sightings.length; i++) {
+    let sighting = Sighting.load(sightings[i].sighting.sightingId.toString())
+    if (sighting && !sighting.isVerified) {
+      sighting.isVerified = true
+      sighting.verifiedBy = event.params.verifier
+      sighting.verifiedAt = event.block.timestamp
+      sighting.save()
+    }
+  }
 }
 
 export function handleRewardDistributed(event: RewardDistributedEvent): void {
-  let entity = new RewardDistributed(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.tokenId = event.params.tokenId
-  entity.totalReward = event.params.totalReward
+  let id = event.transaction.hash.concatI32(event.logIndex.toI32()).toHexString()
+  let distribution = new RewardDistribution(id)
+  let pet = Pet.load(event.params.tokenId.toString())
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  if (pet && pet.currentLostReport) {
+    let lostReport = LostReport.load(pet.currentLostReport)
+    if (lostReport) {
+      lostReport.isLost = false
+      lostReport.resolvedAt = event.block.timestamp
+      lostReport.save()
+    }
 
-  entity.save()
-}
+    pet.isLost = false
+    pet.currentLostReport = null
+    pet.updatedAt = event.block.timestamp
+    pet.save()
+  }
 
-export function handleSightingVerified(event: SightingVerifiedEvent): void {
-  let entity = new SightingVerified(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.tokenId = event.params.tokenId
-  entity.sightingId = event.params.sightingId
-  entity.verifier = event.params.verifier
+  // Get contract to fetch verification details
+  let contract = YourContract.bind(event.address)
+  let verifiers = contract.verifications(event.params.tokenId, new BigInt(0))
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  distribution.pet = event.params.tokenId.toString()
+  distribution.tokenId = event.params.tokenId
+  distribution.totalReward = event.params.totalReward
+  distribution.distributedAt = event.block.timestamp
+  distribution.recipients = [verifiers]
 
-  entity.save()
-}
-
-export function handleTransfer(event: TransferEvent): void {
-  let entity = new Transfer(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.from = event.params.from
-  entity.to = event.params.to
-  entity.tokenId = event.params.tokenId
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
+  distribution.save()
 }
