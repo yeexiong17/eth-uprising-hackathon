@@ -1,37 +1,54 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
+import Map, { Marker } from 'react-map-gl/mapbox';
 import { AuthGuard } from "~~/components/AuthGuard";
-import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { useAccount } from "wagmi";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
 
 interface PetData {
-  tokenId: bigint; // Assuming tokenId is a bigint
+  tokenId: string; // Assuming tokenId is a bigint
   name: string;
   breed: string;
   color: string;
   description: string;
   imageUrl: string; // Ensure this matches the property returned
-  latitude: bigint; // Assuming latitude is stored as bigint
-  longitude: bigint; // Assuming longitude is stored as bigint
+  latitude: number; // Assuming latitude is stored as bigint
+  longitude: number; // Assuming longitude is stored as bigint
   isLost: boolean;
-  reward: bigint; // Assuming reward is stored as bigint
-  prizeAmount: bigint; // Add prizeAmount property
+  reward: number; // Assuming reward is stored as bigint
+  owner: string;
+}
+
+interface FoundPets {
+  sightingId: number;
+  petId: string;
+  user: string;
+  latitude: number;
+  longitude: number;
+  description: string;
+  imageUrl: string;
+  isVerified: boolean;
+  owner: string;
 }
 
 const PetDescription = () => {
+  const { writeContract } = useScaffoldWriteContract({ contractName: "YourContract" });
+  const { address: account } = useAccount();
   const searchParams = useSearchParams();
   const petId = searchParams.get("id");
+  const router = useRouter();
 
   const [pet, setPet] = useState<PetData | null>(null);
+  const [foundPets, setFoundPets] = useState<FoundPets[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
-  const [foundPets, setFoundPets] = useState<{ id: string; name: string; breed: string; color: string; lastSeen: string; image: string; description: string; }[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     breed: "",
@@ -43,16 +60,24 @@ const PetDescription = () => {
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [verifiedPets, setVerifiedPets] = useState([]);
+  const [verifiedPets, setVerifiedPets] = useState<number[]>([]);
   const [rewardAmount, setRewardAmount] = useState(100); // Example total reward amount
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markerRef = useRef<mapboxgl.Marker | null>(null);
   const geocoderRef = useRef<MapboxGeocoder | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   const { data: petsData } = useScaffoldReadContract({
     contractName: "YourContract",
     functionName: "getLostPet",
+    args: [BigInt(petId!)],
+    watch: true,
+  });
+
+  const { data: sightingsData } = useScaffoldReadContract({
+    contractName: "YourContract",
+    functionName: "getSightings",
     args: [BigInt(petId!)],
     watch: true,
   });
@@ -74,123 +99,69 @@ const PetDescription = () => {
         longitude: Number(petsData[10]) / 100000,
         isLost: petsData[7],
         reward: Number(petsData[8]) / 10 ** 18,
+        owner: petsData[6],
       };
-
-      console.log(formattedPets);
 
       setPet(formattedPets);
     }
   }, [petsData]);
 
+  useEffect(() => {
+    if (!petId) return;
+    setFoundPets([]); // Reset pet before fetching new data
 
+    if (sightingsData && sightingsData.length > 0) {
+      console.log(sightingsData);
+      const formattedPets = sightingsData.map((pet) => ({
+        sightingId: Number(pet.sighting.sightingId),
+        petId: petId,
+        user: pet.user,
+        description: pet.sighting.description,
+        imageUrl: pet.sighting.imageURI,
+        latitude: Number(pet.sighting.latitude) / 100000,
+        longitude: Number(pet.sighting.longitude) / 100000,
+        isVerified: pet.isVerified,
+        owner: pet.owner,
+      }));
 
-  const handleVerify = (foundPetId) => {
-    if (verifiedPets.includes(foundPetId)) return;
+      console.log(formattedPets);
 
-    const updatedVerifiedPets = [...verifiedPets, foundPetId];
-    setVerifiedPets(updatedVerifiedPets);
-    localStorage.setItem(`verifiedPets_${petId}`, JSON.stringify(updatedVerifiedPets));
+      setFoundPets(formattedPets);
+    }
+  }, [sightingsData]);
+
+  const handleVerify = async (isVerified: boolean, sightingId: number) => {
+    if (isVerified) return;
+
+    const result = await writeContract({
+      functionName: "verifySighting",
+      args: [BigInt(petId!), BigInt(sightingId)],
+    });
+
+    console.log("result", result);
   };
 
   const [isPetFound, setIsPetFound] = useState(() => {
     return localStorage.getItem(`petFound_${petId}`) === "true";
   });
 
-  const handleDistributeRewards = () => {
-    if (verifiedPets.length === 0) return;
+  const handleDistributeRewards = async () => {
+    alert('Are you sure you want to distribute the reward?');
 
-    const amountPerUser = rewardAmount / verifiedPets.length;
-    alert(`Reward of ${amountPerUser} ETH has been distributed to each verified user!`);
+    try {
+      const result = await writeContract({
+        functionName: "resolveFound",
+        args: [BigInt(petId!)],
+      });
+      console.log("result", result);
+      alert(`Reward has been distributed to each verified user!`);
 
-    // ✅ Disable both buttons after pet is found
-    setIsPetFound(true);
-    localStorage.setItem(`petFound_${petId}`, "true"); // 🔥 Save to localStorage
-
-    updatePetStatus();
-  };
-
-  // ✅ Restore pet found status on page load
-  useEffect(() => {
-    const storedPetFound = localStorage.getItem(`petFound_${petId}`);
-    if (storedPetFound === "true") {
-      setIsPetFound(true);
+      // Route to /home after successful distribution
+      router.push('/home');
+    } catch (error) {
+      console.error("Error distributing rewards:", error);
     }
-  }, [petId]);
-
-  useEffect(() => {
-    if (!petId) return;
-
-    const loadFoundPets = () => {
-      const storedFoundPetsJSON = localStorage.getItem(`foundPets_${petId}`);
-      setFoundPets(storedFoundPetsJSON ? JSON.parse(storedFoundPetsJSON) : []);
-    };
-
-    loadFoundPets();
-
-    // Listen for localStorage changes
-    window.addEventListener("storage", loadFoundPets);
-
-    return () => {
-      window.removeEventListener("storage", loadFoundPets);
-    };
-  }, [petId]);
-
-
-
-  const updatePetStatus = () => {
-    const storedPetsJSON = localStorage.getItem("petData");
-    if (!storedPetsJSON) return;
-
-    const storedPets = JSON.parse(storedPetsJSON);
-    const updatedPets = storedPets.pets.map((p) =>
-      p.id.toString() === petId ? { ...p, status: "Found" } : p
-    );
-
-    // ✅ Save updated pet status to localStorage
-    localStorage.setItem("petData", JSON.stringify({ pets: updatedPets }));
-
-    // ✅ Update UI
-    setPet((prevPet) => prevPet ? { ...prevPet, status: "Found" } : null);
   };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.location.lat || !formData.location.lng) return alert("Please select a valid location.");
-    if (!selectedImage) return alert("Please upload an image of the pet.");
-
-    const imageBase64 = await convertImageToBase64(selectedImage);
-
-    const newFoundPet = {
-      id: Date.now().toString(),
-      name: formData.name,
-      breed: formData.breed,
-      color: formData.color,
-      lastSeen: formData.lastSeen,
-      latitude: formData.location.lat,
-      longitude: formData.location.lng,
-      image: imageBase64,
-      description: formData.description,
-      prizeAmount: pet?.prizeAmount ? pet.prizeAmount / BigInt(10 ** 18) : 0, // Convert wei to eth
-    };
-
-    // 🔥 Retrieve the existing found pets for this specific pet
-    const storedFoundPetsJSON = localStorage.getItem(`foundPets_${petId}`);
-    const storedFoundPets = storedFoundPetsJSON ? JSON.parse(storedFoundPetsJSON) : [];
-
-    // 🔥 Add the new found pet ONLY to this specific pet's list
-    const updatedFoundPets = [...storedFoundPets, newFoundPet];
-    localStorage.setItem(`foundPets_${petId}`, JSON.stringify(updatedFoundPets));
-
-    // ✅ Update state only for this pet's found reports
-    setFoundPets(updatedFoundPets);
-
-    // Reset form and close modal
-    setModalOpen(false);
-    setFormData({ name: "", breed: "", color: "", lastSeen: "", description: "", location: { lat: 0, lng: 0 }, prizeAmount: 0 });
-    setPreviewUrl(null);
-    setSelectedImage(null);
-  };
-
 
   useEffect(() => {
     if (!modalOpen || !mapContainerRef.current) return;
@@ -246,7 +217,6 @@ const PetDescription = () => {
     };
   }, [modalOpen]);
 
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -262,14 +232,68 @@ const PetDescription = () => {
     }
   };
 
+  const handleSubmitFoundPet = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.location.lat || !formData.location.lng) return alert("Please select a valid location.");
+    if (!selectedImage) return alert("Please upload an image of the pet.");
 
-  const convertImageToBase64 = (file: File) => {
-    return new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-    });
+    const uploadData = new FormData();
+    if (selectedImage) {
+      uploadData.append("file", selectedImage);
+    } else {
+      console.error("No image selected for upload.");
+      return;
+    }
+
+    const pinataToken = process.env.NEXT_PUBLIC_PINATA_TOKEN; // Use the token if needed
+
+    try {
+      const response = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${pinataToken}`,
+        },
+        body: uploadData,
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        const ipfsHash = data.IpfsHash; // Get the IPFS URL
+        console.log("Image uploaded successfully:", ipfsHash);
+
+        // Step 2: Prepare metadata for the NFT
+        const name = formData.name;
+        const breed = formData.breed;
+        const color = formData.color;
+        const description = formData.description;
+        const imageURI = `https://gateway.pinata.cloud/ipfs/${ipfsHash}`;
+
+        const latitude = Math.floor(formData.location.lat * 100000); // Convert to integer
+        const longitude = Math.floor(formData.location.lng * 100000); // Convert to integer
+
+        // Step 3: Call the smart contract to mint the NFT
+        const result = await writeContract({
+          functionName: "updateSightings",
+          args: [BigInt(petId!), BigInt(latitude), BigInt(longitude), description, imageURI],
+        });
+        console.log("result", result);
+        // Step 4: Call onMintSuccess with the new pet data
+        router.push('/home');
+      } else {
+        console.error("Error uploading image:", data);
+      }
+    } catch (error) {
+      console.error("Error uploading to Pinata:", error);
+    }
+  };
+
+  const handleLocationClick = (latitude: number, longitude: number) => {
+    setSelectedLocation({ lat: latitude, lng: longitude });
+  };
+
+  const truncateAddress = (address: string) => {
+    if (address.length <= 10) return address; // Return the full address if it's short
+    return `${address.slice(0, 6)}...${address.slice(-4)}`; // Truncate to first 6 and last 4 characters
   };
 
   return (
@@ -314,60 +338,83 @@ const PetDescription = () => {
           </button>
 
           {/* ✅ "Pet Found - Distribute Reward" button - Disabled after clicking */}
-          {verifiedPets.length > 0 && (
-            <button
-              onClick={handleDistributeRewards}
-              disabled={isPetFound}
-              className={`px-6 py-3 text-lg font-semibold rounded-lg shadow-md transition-all duration-200 ${isPetFound
-                ? "bg-gray-400 text-white cursor-not-allowed"
-                : "bg-purple-500 hover:bg-purple-600 text-white hover:shadow-lg"
-                }`}
-            >
-              🎉 Pet Found - Distribute Reward
-            </button>
-          )}
+          <button
+            onClick={() => handleDistributeRewards()}
+            disabled={pet?.owner === account ? false : true}
+            className={`${pet?.owner === account ? "bg-purple-500 hover:bg-purple-600 text-white hover:shadow-lg" : "bg-gray-400 text-white cursor-not-allowed"} px-6 py-3 text-lg font-semibold rounded-lg shadow-md transition-all duration-200`}
+          >
+            🎉 Pet Found - Distribute Reward
+          </button>
         </div>
       </div>
-
 
       {/* 🐾 Reporting Found Pets */}
       <h2 className="text-xl md:text-2xl font-semibold text-green-600 mt-6">
         🐾 Reporting Found Pets
       </h2>
 
-      {foundPets.length === 0 ? (
-        <p className="text-gray-500">No found pets reported yet.</p>
-      ) : (
-        foundPets.map((foundPet) => (
-          <div key={foundPet.id} className="bg-gray-50 p-4 mt-4 rounded-md shadow flex items-center">
+      {foundPets.length > 0 ? (
+        foundPets.map((foundPet, index) => (
+          <div key={index} className="bg-gray-50 p-4 mt-4 rounded-md shadow flex flex-col md:flex-row items-center">
             {/* 🐾 Pet Image */}
-            <img src={foundPet.image} alt="Found Pet" className="w-32 h-32 object-cover rounded-md border" />
+            <img src={foundPet.imageUrl} alt="Found Pet" className="w-32 h-32 object-cover rounded-md border" />
 
             {/* 🐾 Pet Details */}
-            <div className="ml-4 flex-grow">
-              <p className="text-lg font-semibold">🐶 {foundPet.name}</p>
-              <p className="text-gray-700">🐕 Breed: {foundPet.breed}</p>
-              <p className="text-gray-700">🎨 Color: {foundPet.color}</p>
-              <p className="text-gray-700">📍 Found At: {foundPet.lastSeen}</p>
-              <p className="text-gray-700">📝 {foundPet.description}</p>
+            <div className="ml-0 md:ml-4 flex-grow mt-2 md:mt-0">
+              <p className="text-gray-700">📍 Found At: {foundPet.latitude}, {foundPet.longitude}</p>
+              <p className="text-gray-700">👤 User Address: {truncateAddress(foundPet.user)}</p>
+              <p className="text-gray-700">📝 Description: {foundPet.description}</p>
+              <div className="flex justify-center mt-2">
+                <button
+                  onClick={() => handleLocationClick(foundPet.latitude, foundPet.longitude)}
+                  className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 transition"
+                >
+                  View on Map
+                </button>
+              </div>
             </div>
 
-            {/* 🔹 Verify Button - Moved to Right */}
+            {/* 🔹 Verify Button */}
             <button
-              onClick={() => handleVerify(foundPet.id)}
-              disabled={verifiedPets.includes(foundPet.id)}
-              className={`ml-4 px-6 py-3 text-lg font-semibold rounded-lg shadow-md transition-all duration-200 hover:shadow-lg ${verifiedPets.includes(foundPet.id)
+              onClick={() => handleVerify(foundPet.isVerified, foundPet.sightingId)}
+              disabled={foundPet.isVerified || foundPet.owner !== account}
+              className={`mt-4 ml-0 md:ml-4 px-6 py-3 text-lg font-semibold rounded-lg shadow-md transition-all duration-200 ${foundPet.isVerified || foundPet.owner !== account
                 ? "bg-gray-400 text-white cursor-not-allowed"
                 : "bg-blue-500 text-white hover:bg-blue-600"
                 }`}
             >
-              {verifiedPets.includes(foundPet.id) ? "Verified ✅" : "Verify"}
+              {foundPet.isVerified ? "Verified ✅" : "Verify"}
             </button>
           </div>
         ))
+      ) : (
+        <p className="text-gray-500">No found pets reported yet.</p>
       )}
 
-
+      {/* Map Display */}
+      {selectedLocation && (
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-2xl">
+            <h2 className="text-2xl font-bold text-gray-800 text-center mb-4">Location Map</h2>
+            <div className="h-64 w-full">
+              <Map
+                initialViewState={{
+                  longitude: selectedLocation.lng,
+                  latitude: selectedLocation.lat,
+                  zoom: 12,
+                }}
+                mapStyle="mapbox://styles/mapbox/streets-v11"
+                mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+              >
+                <Marker longitude={selectedLocation.lng} latitude={selectedLocation.lat} />
+              </Map>
+            </div>
+            <button onClick={() => setSelectedLocation(null)} className="mt-4 bg-red-500 text-white py-2 px-4 rounded">
+              Close Map
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Report Modal */}
       {modalOpen && (
@@ -387,7 +434,7 @@ const PetDescription = () => {
 
             {/* Scrollable Content */}
             <div className="overflow-y-auto max-h-[75vh] px-2">
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form className="space-y-6">
                 {/* Image Upload */}
                 <div className="form-control">
                   <label className="label">
@@ -399,7 +446,7 @@ const PetDescription = () => {
                         <img
                           src={previewUrl}
                           alt="Preview"
-                          className="w-full h-48 object-cover rounded-md shadow-md"
+                          className="w-full h-48 object-contain rounded-md shadow-md"
                         />
                         <button
                           type="button"
@@ -424,38 +471,6 @@ const PetDescription = () => {
                   </div>
                 </div>
 
-                {/* Breed Input */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium text-gray-700">Pet Breed</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="breed"
-                    value={formData.breed}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Golden Retriever"
-                    className="input input-bordered w-full rounded-md shadow-sm"
-                    required
-                  />
-                </div>
-
-                {/* Color Input */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium text-gray-700">Pet Color</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="color"
-                    value={formData.color}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Golden Brown"
-                    className="input input-bordered w-full rounded-md shadow-sm"
-                    required
-                  />
-                </div>
-
                 {/* Last Seen Location */}
                 <div className="form-control">
                   <label className="label">
@@ -467,7 +482,7 @@ const PetDescription = () => {
                     name="lastSeen"
                     value={formData.lastSeen}
                     readOnly
-                    className="input input-bordered w-full rounded-md shadow-sm cursor-not-allowed"
+                    className="input input-bordered w-full rounded-md shadow-sm cursor-not-allowed text-gray-900 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
                     required
                   />
                   <div className="mt-2 h-64 rounded-md border border-gray-300 overflow-hidden">
@@ -485,14 +500,14 @@ const PetDescription = () => {
                     value={formData.description}
                     onChange={handleInputChange}
                     placeholder="Provide additional details (age, distinctive marks, behavior, etc.)"
-                    className="textarea textarea-bordered w-full h-32 rounded-md shadow-sm"
+                    className="textarea textarea-bordered w-full h-32 rounded-md shadow-sm text-gray-900 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
                     required
                   />
                 </div>
 
                 {/* Submit Button */}
                 <div className="form-control mt-6">
-                  <button type="submit" className="btn bg-blue-500 hover:bg-blue-600 text-white font-semibold w-full py-2 rounded-md shadow-md">
+                  <button onClick={handleSubmitFoundPet} type="submit" className="btn bg-blue-500 hover:bg-blue-600 text-white font-semibold w-full py-2 rounded-md shadow-md">
                     Upload Report
                   </button>
                 </div>

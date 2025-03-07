@@ -3,12 +3,9 @@ import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 interface MintPetModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onMintSuccess: (newPet: any) => void;
 }
 
-
-
-export const MintPetModal = ({ isOpen, onClose, onMintSuccess }: MintPetModalProps) => {
+export const MintPetModal = ({ isOpen, onClose }: MintPetModalProps) => {
     const { writeContract } = useScaffoldWriteContract({ contractName: "YourContract" });
 
     const [formData, setFormData] = useState({
@@ -73,8 +70,7 @@ export const MintPetModal = ({ isOpen, onClose, onMintSuccess }: MintPetModalPro
                     args: [name, breed, color, description, imageURI],
                 });
                 console.log("result", result);
-                // Step 4: Call onMintSuccess with the new pet data
-                // onMintSuccess({ ...formData, image: ipfsHash });
+                onClose()
             } else {
                 console.error("Error uploading image:", data);
             }

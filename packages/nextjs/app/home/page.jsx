@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { useEffect } from 'react';
 import { AuthGuard } from "~~/components/AuthGuard";
 import { useState } from 'react';
-import petData from "../../data/petData.json";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 
 const Home = () => {

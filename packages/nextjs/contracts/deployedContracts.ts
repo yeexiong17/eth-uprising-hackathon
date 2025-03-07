@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   534351: {
     YourContract: {
-      address: "0xbfde1b9780bfa7315a0c4df24c7d33098f3757a5",
+      address: "0x39e01ff59e150f137e294248a4781d1ea4548c56",
       abi: [
         {
           type: "constructor",
@@ -231,10 +231,20 @@ const deployedContracts = {
                   internalType: "address",
                 },
                 {
+                  name: "owner",
+                  type: "address",
+                  internalType: "address",
+                },
+                {
                   name: "sighting",
                   type: "tuple",
                   internalType: "struct YourContract.Sighting",
                   components: [
+                    {
+                      name: "sightingId",
+                      type: "uint256",
+                      internalType: "uint256",
+                    },
                     {
                       name: "latitude",
                       type: "int256",
@@ -256,6 +266,11 @@ const deployedContracts = {
                       internalType: "string",
                     },
                   ],
+                },
+                {
+                  name: "isVerified",
+                  type: "bool",
+                  internalType: "bool",
                 },
               ],
             },
@@ -423,6 +438,19 @@ const deployedContracts = {
               name: "",
               type: "string",
               internalType: "string",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "nextSightingId",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
             },
           ],
           stateMutability: "view",
@@ -634,6 +662,96 @@ const deployedContracts = {
         },
         {
           type: "function",
+          name: "sightingList",
+          inputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "user",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "owner",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "sighting",
+              type: "tuple",
+              internalType: "struct YourContract.Sighting",
+              components: [
+                {
+                  name: "sightingId",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "latitude",
+                  type: "int256",
+                  internalType: "int256",
+                },
+                {
+                  name: "longitude",
+                  type: "int256",
+                  internalType: "int256",
+                },
+                {
+                  name: "description",
+                  type: "string",
+                  internalType: "string",
+                },
+                {
+                  name: "imageURI",
+                  type: "string",
+                  internalType: "string",
+                },
+              ],
+            },
+            {
+              name: "isVerified",
+              type: "bool",
+              internalType: "bool",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "sightingUsers",
+          inputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
           name: "sightings",
           inputs: [
             {
@@ -648,6 +766,11 @@ const deployedContracts = {
             },
           ],
           outputs: [
+            {
+              name: "sightingId",
+              type: "uint256",
+              internalType: "uint256",
+            },
             {
               name: "latitude",
               type: "int256",
@@ -804,6 +927,30 @@ const deployedContracts = {
         },
         {
           type: "function",
+          name: "verifiedSightings",
+          inputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "bool",
+              internalType: "bool",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
           name: "verifySighting",
           inputs: [
             {
@@ -812,9 +959,9 @@ const deployedContracts = {
               internalType: "uint256",
             },
             {
-              name: "user",
-              type: "address",
-              internalType: "address",
+              name: "sightingId",
+              type: "uint256",
+              internalType: "uint256",
             },
           ],
           outputs: [],
@@ -1023,6 +1170,31 @@ const deployedContracts = {
         },
         {
           type: "event",
+          name: "SightingVerified",
+          inputs: [
+            {
+              name: "tokenId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "sightingId",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+            {
+              name: "verifier",
+              type: "address",
+              indexed: false,
+              internalType: "address",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
           name: "Transfer",
           inputs: [
             {
@@ -1151,7 +1323,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1741285027.json",
+      deploymentFile: "run-1741318807.json",
       deploymentScript: "Deploy.s.sol",
     },
   },

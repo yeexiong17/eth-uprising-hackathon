@@ -5,11 +5,16 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
 contract YourContract is ERC721URIStorage {
     uint256 public nextTokenId;
+    uint256 public nextSightingId;
     mapping(uint256 => Pet) public pets;
     mapping(uint256 => LostReport) public lostReports;
     mapping(uint256 => mapping(address => Sighting)) public sightings;
     mapping(uint256 => address[]) public verifications;
     mapping(uint256 => uint256) public rewardPool;
+    mapping(uint256 => address[]) public sightingUsers;
+    mapping(uint256 => SightingInfo[]) public sightingList; // Stores sightings per tokenId
+    mapping(uint256 => mapping(uint256 => bool)) public verifiedSightings; // Track verified sightings (tokenId => sightingId => verified)
+
     struct Pet {
         uint256 tokenId;
         string name;
@@ -42,6 +47,7 @@ contract YourContract is ERC721URIStorage {
     }
 
     struct Sighting {
+        uint256 sightingId;
         int256 latitude;
         int256 longitude;
         string description;
@@ -49,8 +55,10 @@ contract YourContract is ERC721URIStorage {
     }
 
     struct SightingInfo {
-        address user;
+        address user; // Who reported the sighting
+        address owner; // Pet owner's address
         Sighting sighting;
+        bool isVerified;
     }
 
     event PetMinted(uint256 indexed tokenId, address owner, string name);
@@ -65,7 +73,11 @@ contract YourContract is ERC721URIStorage {
         int256 latitude,
         int256 longitude
     );
-
+    event SightingVerified(
+        uint256 indexed tokenId,
+        uint256 sightingId,
+        address verifier
+    );
     event PetVerified(uint256 indexed tokenId, address indexed verifier);
     event RewardDistributed(uint256 indexed tokenId, uint256 totalReward);
 
@@ -196,20 +208,54 @@ contract YourContract is ERC721URIStorage {
     ) external {
         require(lostReports[tokenId].isLost, "Pet is not reported lost.");
 
-        sightings[tokenId][msg.sender] = Sighting(
+        uint256 sightingId = nextSightingId++; // Generate unique sighting ID
+        address owner = ownerOf(tokenId); // Get pet owner's address
+
+        Sighting memory newSighting = Sighting(
+            sightingId,
             latitude,
             longitude,
             description,
             imageURI
         );
 
+        sightingList[tokenId].push(
+            SightingInfo(msg.sender, owner, newSighting, false) // Store owner
+        );
+
         emit PetSighted(tokenId, msg.sender, latitude, longitude);
     }
 
-    function verifySighting(uint256 tokenId, address user) external {
+    function verifySighting(uint256 tokenId, uint256 sightingId) external {
         require(ownerOf(tokenId) == msg.sender, "Only pet owner can verify.");
-        verifications[tokenId].push(user);
-        emit PetVerified(tokenId, user);
+
+        bool found = false;
+        for (uint256 i = 0; i < sightingList[tokenId].length; i++) {
+            if (sightingList[tokenId][i].sighting.sightingId == sightingId) {
+                found = true;
+                sightingList[tokenId][i].isVerified = true; // Mark sighting as verified
+
+                // Add the reporter to verifications list if not already added
+                address verifier = sightingList[tokenId][i].user;
+                bool alreadyVerified = false;
+                for (uint256 j = 0; j < verifications[tokenId].length; j++) {
+                    if (verifications[tokenId][j] == verifier) {
+                        alreadyVerified = true;
+                        break;
+                    }
+                }
+                if (!alreadyVerified) {
+                    verifications[tokenId].push(verifier);
+                }
+
+                break;
+            }
+        }
+        require(found, "Sighting ID not found.");
+
+        verifiedSightings[tokenId][sightingId] = true;
+
+        emit SightingVerified(tokenId, sightingId, msg.sender);
     }
 
     function resolveFound(uint256 tokenId) external {
@@ -231,8 +277,10 @@ contract YourContract is ERC721URIStorage {
             payable(msg.sender).transfer(totalReward); // Refund pet owner
         }
 
+        // Clear all previous data related to the lost report
         rewardPool[tokenId] = 0;
         delete verifications[tokenId];
+        delete sightingList[tokenId]; // Clears all past sightings
 
         emit RewardDistributed(tokenId, totalReward);
     }
@@ -281,39 +329,6 @@ contract YourContract is ERC721URIStorage {
     function getSightings(
         uint256 tokenId
     ) external view returns (SightingInfo[] memory) {
-        uint256 count = 0;
-        address[] memory users = new address[](count);
-
-        // Count the number of sightings
-        uint256 index = 0;
-        for (uint256 i = 0; i < count; i++) {
-            address user = users[i];
-            if (
-                sightings[tokenId][user].latitude != 0 ||
-                sightings[tokenId][user].longitude != 0
-            ) {
-                count++;
-            }
-        }
-
-        // Create an array of SightingInfo
-        SightingInfo[] memory sightingInfos = new SightingInfo[](count);
-
-        index = 0;
-        for (uint256 i = 0; i < count; i++) {
-            address user = users[i];
-            if (
-                sightings[tokenId][user].latitude != 0 ||
-                sightings[tokenId][user].longitude != 0
-            ) {
-                sightingInfos[index] = SightingInfo(
-                    user,
-                    sightings[tokenId][user]
-                );
-                index++;
-            }
-        }
-
-        return sightingInfos;
+        return sightingList[tokenId];
     }
 }

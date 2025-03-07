@@ -7,7 +7,6 @@ import { AuthGuard } from "~~/components/AuthGuard";
 import { MintPetModal } from "~~/components/pet-finder/MintPetModal";
 import { PetNFTCard } from "~~/components/pet-finder/PetNFTCard";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
-
 interface PetNFT {
     tokenId: string;
     name: string;
@@ -97,10 +96,6 @@ const MyPetsPage = () => {
                 <MintPetModal
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
-                    onMintSuccess={(newPet) => {
-                        setMyPets([...myPets, newPet]);
-                        setIsModalOpen(false);
-                    }}
                 />
             )}
         </div>

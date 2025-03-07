@@ -113,6 +113,8 @@ export const PetNFTCard = ({ pet }: PetNFTCardProps) => {
                 ],
                 value: parseEther(prizeAmount),
             });
+
+            setIsReportModalOpen(false);
         } catch (error) {
             console.error("Error submitting lost pet report:", error);
             alert("An error occurred while submitting the lost pet report. Please try again.");
