@@ -16,7 +16,7 @@ interface PetNFTCardProps {
     breed: string;
     color: string;
     description: string;
-    imageUrl: string;
+    imageURI: string;
   };
 }
 
@@ -134,7 +134,7 @@ export const PetNFTCard = ({ pet }: PetNFTCardProps) => {
       <div className="group relative bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
         <div className="relative h-40 overflow-hidden bg-gray-100">
           <img
-            src={pet.imageUrl}
+            src={pet.imageURI}
             alt={pet.name}
             className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
           />

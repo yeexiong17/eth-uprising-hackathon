@@ -6,7 +6,7 @@ import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { AuthGuard } from "~~/components/AuthGuard";
 import { MintPetModal } from "~~/components/pet-finder/MintPetModal";
 import { PetNFTCard } from "~~/components/pet-finder/PetNFTCard";
-import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+import { useUserMintedPets, Pet } from "~~/hooks/useGraphQueries";
 
 interface PetNFT {
   tokenId: string;
@@ -14,7 +14,7 @@ interface PetNFT {
   breed: string;
   color: string;
   description: string;
-  imageUrl: string;
+  imageURI: string;
 }
 
 const MyPetsPage = () => {
@@ -22,28 +22,24 @@ const MyPetsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [myPets, setMyPets] = useState<PetNFT[]>([]);
 
-  const { data: petsData } = useScaffoldReadContract({
-    contractName: "YourContract",
-    functionName: "getUserMintedPets",
-    args: [address],
-    watch: true,
-  });
+  const { data: petsData, isLoading } = useUserMintedPets(address || "");
 
   useEffect(() => {
-    if (petsData) {
-      console.log(petsData);
-      const formattedPets = petsData.map(pet => ({
-        tokenId: pet.tokenId.toString(),
+    console.log(petsData)
+    if (!isLoading && petsData?.pets) {
+      console.log('User pets data:', petsData);
+      const formattedPets = petsData.pets.map((pet: Pet) => ({
+        tokenId: pet.tokenId,
         name: pet.name,
         breed: pet.breed,
         color: pet.color,
         description: pet.description,
-        imageUrl: pet.imageURI,
+        imageURI: pet.imageURI,
       }));
 
       setMyPets(formattedPets);
     }
-  }, [petsData]);
+  }, [petsData, isLoading]);
 
   return (
     <div className="min-h-screen bg-white">

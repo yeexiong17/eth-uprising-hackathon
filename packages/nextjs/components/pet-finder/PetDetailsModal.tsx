@@ -5,7 +5,7 @@ interface PetDetailsModalProps {
     breed: string;
     color: string;
     description: string;
-    imageUrl: string;
+    imageURI: string;
   };
   isOpen: boolean;
   onClose: () => void;
@@ -31,7 +31,7 @@ export const PetDetailsModal = ({ pet, isOpen, onClose }: PetDetailsModalProps) 
 
           {/* Image */}
           <div className="relative h-48 rounded-t-lg overflow-hidden bg-gray-100">
-            <img src={pet.imageUrl} alt={pet.name} className="w-full h-full object-contain" />
+            <img src={pet.imageURI} alt={pet.name} className="w-full h-full object-contain" />
           </div>
 
           {/* Content */}

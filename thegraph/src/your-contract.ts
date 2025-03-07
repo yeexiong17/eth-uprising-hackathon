@@ -4,7 +4,8 @@ import {
   PetSighted as PetSightedEvent,
   PetVerified as PetVerifiedEvent,
   RewardDistributed as RewardDistributedEvent,
-  YourContract
+  YourContract,
+  Transfer as TransferEvent
 } from "../generated/YourContract/YourContract"
 import {
   Pet,
@@ -82,7 +83,7 @@ export function handlePetSighted(event: PetSightedEvent): void {
   // Link to current lost report
   let pet = Pet.load(event.params.tokenId.toString())
   if (pet && pet.currentLostReport) {
-    sighting.lostReport = pet.currentLostReport
+    sighting.lostReport = pet.currentLostReport as string
   }
 
   sighting.save()
@@ -113,7 +114,7 @@ export function handleRewardDistributed(event: RewardDistributedEvent): void {
   let pet = Pet.load(event.params.tokenId.toString())
 
   if (pet && pet.currentLostReport) {
-    let lostReport = LostReport.load(pet.currentLostReport)
+    let lostReport = LostReport.load(pet.currentLostReport as string)
     if (lostReport) {
       lostReport.isLost = false
       lostReport.resolvedAt = event.block.timestamp
@@ -137,4 +138,13 @@ export function handleRewardDistributed(event: RewardDistributedEvent): void {
   distribution.recipients = [verifiers]
 
   distribution.save()
+}
+
+export function handleTransfer(event: TransferEvent): void {
+  let pet = Pet.load(event.params.tokenId.toString())
+  if (pet) {
+    pet.owner = event.params.to
+    pet.updatedAt = event.block.timestamp
+    pet.save()
+  }
 }
