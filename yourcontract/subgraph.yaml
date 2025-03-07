@@ -1,0 +1,56 @@
+specVersion: 1.2.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: YourContract
+    network: scroll-sepolia
+    source:
+      address: "0x0EF565022d896A14f8D26110841D5da8d8b6A0FE"
+      abi: YourContract
+      startBlock: 8422765
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Approval
+        - ApprovalForAll
+        - BatchMetadataUpdate
+        - MetadataUpdate
+        - PetMinted
+        - PetReportedLost
+        - PetSighted
+        - PetVerified
+        - RewardDistributed
+        - SightingVerified
+        - Transfer
+      abis:
+        - name: YourContract
+          file: ./abis/YourContract.json
+      eventHandlers:
+        - event: Approval(indexed address,indexed address,indexed uint256)
+          handler: handleApproval
+        - event: ApprovalForAll(indexed address,indexed address,bool)
+          handler: handleApprovalForAll
+        - event: BatchMetadataUpdate(uint256,uint256)
+          handler: handleBatchMetadataUpdate
+        - event: MetadataUpdate(uint256)
+          handler: handleMetadataUpdate
+        - event: PetMinted(indexed uint256,address,string)
+          handler: handlePetMinted
+        - event: PetReportedLost(indexed uint256,int256,int256)
+          handler: handlePetReportedLost
+        - event: PetSighted(indexed uint256,indexed address,int256,int256)
+          handler: handlePetSighted
+        - event: PetVerified(indexed uint256,indexed address)
+          handler: handlePetVerified
+        - event: RewardDistributed(indexed uint256,uint256)
+          handler: handleRewardDistributed
+        - event: SightingVerified(indexed uint256,uint256,address)
+          handler: handleSightingVerified
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+      file: ./src/your-contract.ts
