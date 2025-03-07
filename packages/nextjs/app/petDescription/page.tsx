@@ -1,15 +1,15 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
-import mapboxgl from "mapbox-gl";
+import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
-import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
-import Map, { Marker } from 'react-map-gl/mapbox';
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import Map, { Marker } from "react-map-gl/mapbox";
+import { useAccount } from "wagmi";
 import { AuthGuard } from "~~/components/AuthGuard";
 import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
-import { useAccount } from "wagmi";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
 
@@ -112,7 +112,7 @@ const PetDescription = () => {
 
     if (sightingsData && sightingsData.length > 0) {
       console.log(sightingsData);
-      const formattedPets = sightingsData.map((pet) => ({
+      const formattedPets = sightingsData.map(pet => ({
         sightingId: Number(pet.sighting.sightingId),
         petId: petId,
         user: pet.user,
@@ -146,7 +146,7 @@ const PetDescription = () => {
   });
 
   const handleDistributeRewards = async () => {
-    alert('Are you sure you want to distribute the reward?');
+    alert("Are you sure you want to distribute the reward?");
 
     try {
       const result = await writeContract({
@@ -157,7 +157,7 @@ const PetDescription = () => {
       alert(`Reward has been distributed to each verified user!`);
 
       // Route to /home after successful distribution
-      router.push('/home');
+      router.push("/home");
     } catch (error) {
       console.error("Error distributing rewards:", error);
     }
@@ -191,11 +191,11 @@ const PetDescription = () => {
       geocoderContainer.appendChild(geocoderRef.current.onAdd(mapRef.current));
     }
 
-    geocoderRef.current.on("result", (e) => {
+    geocoderRef.current.on("result", e => {
       const { center, place_name } = e.result;
       if (center) {
         const [lng, lat] = center;
-        setFormData((prev) => ({ ...prev, lastSeen: place_name, location: { lat, lng } }));
+        setFormData(prev => ({ ...prev, lastSeen: place_name, location: { lat, lng } }));
         mapRef.current?.flyTo({ center: [lng, lat], zoom: 14 });
 
         if (markerRef.current) markerRef.current.remove();
@@ -204,9 +204,13 @@ const PetDescription = () => {
     });
 
     // Update the onClick event to set the location
-    mapRef.current.on("click", (e) => {
+    mapRef.current.on("click", e => {
       const { lng, lat } = e.lngLat;
-      setFormData((prev) => ({ ...prev, lastSeen: `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`, location: { lat, lng } }));
+      setFormData(prev => ({
+        ...prev,
+        lastSeen: `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`,
+        location: { lat, lng },
+      }));
 
       if (markerRef.current) markerRef.current.remove();
       markerRef.current = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(mapRef.current!);
@@ -217,12 +221,12 @@ const PetDescription = () => {
     };
   }, [modalOpen]);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = e => {
     const file = e.target.files?.[0];
     if (file) {
       setSelectedImage(file);
@@ -278,7 +282,7 @@ const PetDescription = () => {
         });
         console.log("result", result);
         // Step 4: Call onMintSuccess with the new pet data
-        router.push('/home');
+        router.push("/home");
       } else {
         console.error("Error uploading image:", data);
       }
@@ -309,11 +313,7 @@ const PetDescription = () => {
       </div>
       <div className="bg-white p-6 rounded-lg shadow-md flex flex-col md:flex-row items-center w-full">
         {/* 🔹 Pet Image */}
-        <img
-          src={pet?.imageUrl}
-          alt={pet?.name}
-          className="w-full h-40 object-contain rounded-md border"
-        />
+        <img src={pet?.imageUrl} alt={pet?.name} className="w-full h-40 object-contain rounded-md border" />
 
         {/* 🔹 Pet Info */}
         <div className="md:ml-6 mt-4 md:mt-0 text-center md:text-left flex-grow">
@@ -329,10 +329,11 @@ const PetDescription = () => {
           <button
             onClick={() => setModalOpen(true)}
             disabled={isPetFound}
-            className={`px-6 py-3 text-lg font-semibold rounded-lg shadow-md transition-all duration-200 ${isPetFound
-              ? "bg-gray-400 text-white cursor-not-allowed"
-              : "bg-green-500 hover:bg-green-600 text-white hover:shadow-lg"
-              }`}
+            className={`px-6 py-3 text-lg font-semibold rounded-lg shadow-md transition-all duration-200 ${
+              isPetFound
+                ? "bg-gray-400 text-white cursor-not-allowed"
+                : "bg-green-500 hover:bg-green-600 text-white hover:shadow-lg"
+            }`}
           >
             📝 Report a Found Pet
           </button>
@@ -349,9 +350,7 @@ const PetDescription = () => {
       </div>
 
       {/* 🐾 Reporting Found Pets */}
-      <h2 className="text-xl md:text-2xl font-semibold text-green-600 mt-6">
-        🐾 Reporting Found Pets
-      </h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-green-600 mt-6">🐾 Reporting Found Pets</h2>
 
       {foundPets.length > 0 ? (
         foundPets.map((foundPet, index) => (
@@ -361,7 +360,9 @@ const PetDescription = () => {
 
             {/* 🐾 Pet Details */}
             <div className="ml-0 md:ml-4 flex-grow mt-2 md:mt-0">
-              <p className="text-gray-700">📍 Found At: {foundPet.latitude}, {foundPet.longitude}</p>
+              <p className="text-gray-700">
+                📍 Found At: {foundPet.latitude}, {foundPet.longitude}
+              </p>
               <p className="text-gray-700">👤 User Address: {truncateAddress(foundPet.user)}</p>
               <p className="text-gray-700">📝 Description: {foundPet.description}</p>
               <div className="flex justify-center mt-2">
@@ -378,10 +379,11 @@ const PetDescription = () => {
             <button
               onClick={() => handleVerify(foundPet.isVerified, foundPet.sightingId)}
               disabled={foundPet.isVerified || foundPet.owner !== account}
-              className={`mt-4 ml-0 md:ml-4 px-6 py-3 text-lg font-semibold rounded-lg shadow-md transition-all duration-200 ${foundPet.isVerified || foundPet.owner !== account
-                ? "bg-gray-400 text-white cursor-not-allowed"
-                : "bg-blue-500 text-white hover:bg-blue-600"
-                }`}
+              className={`mt-4 ml-0 md:ml-4 px-6 py-3 text-lg font-semibold rounded-lg shadow-md transition-all duration-200 ${
+                foundPet.isVerified || foundPet.owner !== account
+                  ? "bg-gray-400 text-white cursor-not-allowed"
+                  : "bg-blue-500 text-white hover:bg-blue-600"
+              }`}
             >
               {foundPet.isVerified ? "Verified ✅" : "Verify"}
             </button>
@@ -420,9 +422,7 @@ const PetDescription = () => {
       {modalOpen && (
         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 backdrop-blur-sm transition-all duration-300">
           <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
-            <h2 className="text-2xl font-bold text-gray-800 text-center mb-4">
-              🐾 Report a Found Pet
-            </h2>
+            <h2 className="text-2xl font-bold text-gray-800 text-center mb-4">🐾 Report a Found Pet</h2>
 
             {/* Close Button */}
             <button
@@ -465,7 +465,13 @@ const PetDescription = () => {
                           <p className="mb-2 text-sm text-gray-500">Click to upload</p>
                           <p className="text-xs text-gray-500">PNG, JPG, JPEG</p>
                         </div>
-                        <input type="file" className="hidden" accept="image/png, image/jpeg, image/jpg" onChange={handleImageChange} required />
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept="image/png, image/jpeg, image/jpg"
+                          onChange={handleImageChange}
+                          required
+                        />
                       </label>
                     )}
                   </div>
@@ -507,7 +513,11 @@ const PetDescription = () => {
 
                 {/* Submit Button */}
                 <div className="form-control mt-6">
-                  <button onClick={handleSubmitFoundPet} type="submit" className="btn bg-blue-500 hover:bg-blue-600 text-white font-semibold w-full py-2 rounded-md shadow-md">
+                  <button
+                    onClick={handleSubmitFoundPet}
+                    type="submit"
+                    className="btn bg-blue-500 hover:bg-blue-600 text-white font-semibold w-full py-2 rounded-md shadow-md"
+                  >
                     Upload Report
                   </button>
                 </div>
@@ -516,11 +526,12 @@ const PetDescription = () => {
           </div>
         </div>
       )}
-
-
-
     </div>
   );
 };
 
-export default () => <AuthGuard requireAuth={true}><PetDescription /></AuthGuard>;
+export default () => (
+  <AuthGuard requireAuth={true}>
+    <PetDescription />
+  </AuthGuard>
+);

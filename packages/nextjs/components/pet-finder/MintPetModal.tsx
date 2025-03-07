@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+
 interface MintPetModalProps {
     isOpen: boolean;
     onClose: () => void;
 }
 
-export const MintPetModal = ({ isOpen, onClose }: MintPetModalProps) => {
+export const MintPetModal = function MintPetModal({ isOpen, onClose }: MintPetModalProps) {
     const { writeContract } = useScaffoldWriteContract({ contractName: "YourContract" });
 
     const [formData, setFormData] = useState({
@@ -70,7 +71,7 @@ export const MintPetModal = ({ isOpen, onClose }: MintPetModalProps) => {
                     args: [name, breed, color, description, imageURI],
                 });
                 console.log("result", result);
-                onClose()
+                onClose();
             } else {
                 console.error("Error uploading image:", data);
             }
@@ -87,10 +88,7 @@ export const MintPetModal = ({ isOpen, onClose }: MintPetModalProps) => {
             <div className="flex min-h-full items-center justify-center p-4">
                 <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md">
                     {/* Close button */}
-                    <button
-                        onClick={onClose}
-                        className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-                    >
+                    <button onClick={onClose} className="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -116,18 +114,17 @@ export const MintPetModal = ({ isOpen, onClose }: MintPetModalProps) => {
                                     ) : (
                                         <div className="flex flex-col items-center justify-center py-3">
                                             <svg className="w-6 h-6 mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                                                />
                                             </svg>
                                             <p className="text-xs text-gray-500">Click to upload pet image</p>
                                         </div>
                                     )}
-                                    <input
-                                        type="file"
-                                        className="hidden"
-                                        accept="image/*"
-                                        onChange={handleImageChange}
-                                        required
-                                    />
+                                    <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} required />
                                 </label>
                             </div>
                         </div>
@@ -140,7 +137,7 @@ export const MintPetModal = ({ isOpen, onClose }: MintPetModalProps) => {
                                     type="text"
                                     className="w-full px-2.5 py-1.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
                                     value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    onChange={e => setFormData({ ...formData, name: e.target.value })}
                                     required
                                 />
                             </div>
@@ -151,7 +148,7 @@ export const MintPetModal = ({ isOpen, onClose }: MintPetModalProps) => {
                                     type="text"
                                     className="w-full px-2.5 py-1.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
                                     value={formData.breed}
-                                    onChange={(e) => setFormData({ ...formData, breed: e.target.value })}
+                                    onChange={e => setFormData({ ...formData, breed: e.target.value })}
                                     required
                                 />
                             </div>
@@ -162,7 +159,7 @@ export const MintPetModal = ({ isOpen, onClose }: MintPetModalProps) => {
                                     type="text"
                                     className="w-full px-2.5 py-1.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
                                     value={formData.color}
-                                    onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                                    onChange={e => setFormData({ ...formData, color: e.target.value })}
                                     required
                                 />
                             </div>
@@ -173,7 +170,7 @@ export const MintPetModal = ({ isOpen, onClose }: MintPetModalProps) => {
                                     className="w-full px-2.5 py-1.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
                                     rows={2}
                                     value={formData.description}
-                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                    onChange={e => setFormData({ ...formData, description: e.target.value })}
                                     required
                                 />
                             </div>
@@ -200,4 +197,4 @@ export const MintPetModal = ({ isOpen, onClose }: MintPetModalProps) => {
             </div>
         </div>
     );
-}; 
+};
