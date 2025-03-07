@@ -60,8 +60,6 @@ const PetDescription = () => {
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [verifiedPets, setVerifiedPets] = useState<number[]>([]);
-  const [rewardAmount, setRewardAmount] = useState(100); // Example total reward amount
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markerRef = useRef<mapboxgl.Marker | null>(null);
@@ -163,11 +161,6 @@ const PetDescription = () => {
 
   useEffect(() => {
     if (!modalOpen || !mapContainerRef.current) return;
-
-    // Remove old Mapbox instance before creating a new one
-    if (mapRef.current) {
-      mapRef.current.remove();
-    }
 
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
@@ -274,11 +267,11 @@ const PetDescription = () => {
         const longitude = Math.floor(formData.location.lng * 100000); // Convert to integer
 
         // Step 3: Call the smart contract to mint the NFT
-        const result = await writeYourContractAsync({
+        await writeYourContractAsync({
           functionName: "updateSightings",
           args: [BigInt(petId!), BigInt(latitude), BigInt(longitude), description, imageURI],
         });
-        console.log("result", result);
+        setModalOpen(false);
       } else {
         console.error("Error uploading image:", data);
       }
@@ -317,7 +310,7 @@ const PetDescription = () => {
           <p className="text-gray-700">🐕 Breed: {pet?.breed}</p>
           <p className="text-gray-700">🎨 Color: {pet?.color}</p>
           <p className="text-gray-700">📝 {pet?.description}</p>
-          <p className="text-gray-700 font-semibold">💰 Prize: {pet?.reward} ETH</p>
+          <p className="text-gray-700 font-semibold">💰 Prize Pool: {pet?.reward} ETH</p>
         </div>
 
         <div className="mt-4 md:mt-0 flex flex-col space-y-4">
