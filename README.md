@@ -296,8 +296,8 @@ For support, please join our [Discord Community](your-discord-link) or open a Gi
 
 - **Smart Contract**
   - Network: Scroll Sepolia Testnet
-  - Contract Address: [Your Contract Address]
-  - ScrollScan Link: [Your ScrollScan Link]
+  - Contract Address: 0x0EF565022d896A14f8D26110841D5da8d8b6A0FE
+  - ScrollScan Link: https://sepolia.scrollscan.com/address/0x0EF565022d896A14f8D26110841D5da8d8b6A0FE
 
 - **Subgraphs**
   - Pet NFTs: [Graph Explorer Link]
