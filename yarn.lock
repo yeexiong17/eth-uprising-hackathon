@@ -1844,7 +1844,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphprotocol/graph-cli@npm:0.96.0":
+"@graphprotocol/graph-cli@npm:^0.96.0":
   version: 0.96.0
   resolution: "@graphprotocol/graph-cli@npm:0.96.0"
   dependencies:
@@ -1880,12 +1880,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphprotocol/graph-ts@npm:0.37.0":
-  version: 0.37.0
-  resolution: "@graphprotocol/graph-ts@npm:0.37.0"
+"@graphprotocol/graph-ts@npm:^0.38.0":
+  version: 0.38.0
+  resolution: "@graphprotocol/graph-ts@npm:0.38.0"
   dependencies:
     assemblyscript: 0.27.31
-  checksum: 206a2acdecf4432afea35e1ce8bc6e4c85fba2b2428d11445637ca6834da884167d6113ad7ad84c708ff7b25e0fd6c623db2bc59078e816e2f48a67b57b961f2
+  checksum: 75a2b18d40eb00bd33d2b9b18f7bda26d799a45ece3eed273b474944e0d4dc6e0660fafab6840b90189e1a57ae15a1ade84f4a0a24494a966315cb250ae83efc
   languageName: node
   linkType: hard
 
@@ -14346,8 +14346,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "pets_lost_and_found@workspace:packages/thegraph"
   dependencies:
-    "@graphprotocol/graph-cli": 0.96.0
-    "@graphprotocol/graph-ts": 0.37.0
+    "@graphprotocol/graph-cli": ^0.96.0
+    "@graphprotocol/graph-ts": ^0.38.0
     matchstick-as: 0.6.0
   languageName: unknown
   linkType: soft
