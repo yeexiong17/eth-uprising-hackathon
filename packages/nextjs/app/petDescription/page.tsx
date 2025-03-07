@@ -179,8 +179,8 @@ const PetDescription = () => {
     });
 
     geocoderRef.current = new MapboxGeocoder({
-      accessToken: mapboxgl.accessToken,
-      mapboxgl: mapboxgl,
+      accessToken: mapboxgl.accessToken || "",
+      mapboxgl: mapboxgl as any,
       placeholder: "Search for a location...",
       marker: false,
     });
@@ -221,12 +221,12 @@ const PetDescription = () => {
     };
   }, [modalOpen]);
 
-  const handleInputChange = e => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleImageChange = e => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setSelectedImage(file);
@@ -329,11 +329,10 @@ const PetDescription = () => {
           <button
             onClick={() => setModalOpen(true)}
             disabled={isPetFound}
-            className={`px-6 py-3 text-lg font-semibold rounded-lg shadow-md transition-all duration-200 ${
-              isPetFound
-                ? "bg-gray-400 text-white cursor-not-allowed"
-                : "bg-green-500 hover:bg-green-600 text-white hover:shadow-lg"
-            }`}
+            className={`px-6 py-3 text-lg font-semibold rounded-lg shadow-md transition-all duration-200 ${isPetFound
+              ? "bg-gray-400 text-white cursor-not-allowed"
+              : "bg-green-500 hover:bg-green-600 text-white hover:shadow-lg"
+              }`}
           >
             📝 Report a Found Pet
           </button>
@@ -379,11 +378,10 @@ const PetDescription = () => {
             <button
               onClick={() => handleVerify(foundPet.isVerified, foundPet.sightingId)}
               disabled={foundPet.isVerified || foundPet.owner !== account}
-              className={`mt-4 ml-0 md:ml-4 px-6 py-3 text-lg font-semibold rounded-lg shadow-md transition-all duration-200 ${
-                foundPet.isVerified || foundPet.owner !== account
-                  ? "bg-gray-400 text-white cursor-not-allowed"
-                  : "bg-blue-500 text-white hover:bg-blue-600"
-              }`}
+              className={`mt-4 ml-0 md:ml-4 px-6 py-3 text-lg font-semibold rounded-lg shadow-md transition-all duration-200 ${foundPet.isVerified || foundPet.owner !== account
+                ? "bg-gray-400 text-white cursor-not-allowed"
+                : "bg-blue-500 text-white hover:bg-blue-600"
+                }`}
             >
               {foundPet.isVerified ? "Verified ✅" : "Verify"}
             </button>
