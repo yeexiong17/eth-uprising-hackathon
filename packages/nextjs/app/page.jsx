@@ -13,7 +13,7 @@ const PublicPage = () => {
       <div className="bg-white shadow-md">
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-            Welcome to Pet Finder
+            Welcome to PawChain
           </h1>
           <p className="text-xl text-gray-600 mb-8">
             Helping lost pets find their way back home
