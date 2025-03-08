@@ -253,5 +253,6 @@ For support, please join our [Discord Community](your-discord-link) or open a Gi
 
 - **Subgraphs**
   - PawChain: https://api.studio.thegraph.com/query/105170/pawchain/version/latest
+  - Code Link: https://github.com/yeexiong17/eth-uprising-hackathon/tree/main/packages/pawchain
   - Video Pitch: https://www.youtube.com/watch?v=iCUYbW3heZw 
     
