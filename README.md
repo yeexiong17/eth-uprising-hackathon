@@ -58,17 +58,6 @@ PawChain leverages The Graph's subgraphs for efficient data indexing and retriev
   - Stores finder verification data
   - [View Subgraph](your-recoveries-subgraph-link)
 
-### Subgraph Deployment Details
-
-- **Deployment Network**: Scroll Sepolia
-- **Graph Explorer**: [View on The Graph Explorer](your-graph-explorer-link)
-- **Subgraph Endpoints**:
-  ```
-  Pet NFTs: https://api.thegraph.com/subgraphs/name/your-username/pet-nfts
-  Lost & Found: https://api.thegraph.com/subgraphs/name/your-username/lost-found
-  Recoveries: https://api.thegraph.com/subgraphs/name/your-username/recoveries
-  ```
-
 ## 🔧 Technical Stack
 
 - **Frontend**: 
@@ -127,34 +116,12 @@ Before you begin, ensure you have installed:
    ETHERSCAN_API_KEY=your_etherscan_api_key
 
    # packages/nextjs/.env
-   NEXT_PUBLIC_ALCHEMY_API_KEY=your_alchemy_api_key
-   NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_walletconnect_project_id
+   NEXT_PUBLIC_MAPBOX_TOKEN=YOUR_MAPBOX_TOKEN
+   NEXT_PUBLIC_PINATA_TOKEN=YOUR_PINATA_TOKEN
+   NEXT_PUBLIC_SUBGRAPH_URL="https://api.studio.thegraph.com/query/105170/pawchain/version/latest"\
    ```
 
-4. **Deploy Subgraphs**
-   ```bash
-   # Install Graph CLI
-   npm install -g @graphprotocol/graph-cli
-
-   # Initialize subgraph
-   cd subgraph
-   yarn install
-
-   # Generate types
-   yarn codegen
-
-   # Deploy subgraphs
-   yarn deploy:pet-nfts
-   yarn deploy:lost-found
-   yarn deploy:recoveries
-   ```
-
-5. **Deploy Smart Contracts**
-   ```bash
-   yarn deploy --network scrollSepolia
-   ```
-
-6. **Start the Frontend**
+4. **Start the Frontend**
    ```bash
    yarn start
    ```
@@ -165,34 +132,17 @@ Example GraphQL queries for common operations:
 
 ```graphql
 # Query Pet NFT Details
-query getPetNFT($tokenId: ID!) {
-  pet(id: $tokenId) {
-    id
-    owner
-    metadata
-    createdAt
+query GetUserMintedPets($userAddress: Bytes!) {
+    pets(where: { owner: $userAddress }) {
+      id
+      tokenId
+      name
+      breed
+      color
+      description
+      imageURI
+    }
   }
-}
-
-# Query Lost Pet Reports
-query getLostPets($first: Int!) {
-  lostPetReports(first: $first, orderBy: createdAt, orderDirection: desc) {
-    id
-    petId
-    location
-    status
-  }
-}
-
-# Query Verified Recoveries
-query getRecoveries($finder: String!) {
-  recoveries(where: { finder: $finder }) {
-    id
-    petId
-    reward
-    timestamp
-  }
-}
 ```
 
 ## 📦 Project Structure
@@ -202,17 +152,14 @@ pawchain/
 ├── packages/
 │   ├── foundry/          # Smart contracts
 │   ├── nextjs/           # Frontend application
-│   └── subgraph/         # The Graph subgraphs
-│       ├── pet-nfts/
-│       ├── lost-found/
-│       └── recoveries/
+│   └── pawchain/         # The Graph subgraphs
 ```
 
 ## 🔍 Contract Details
 
 - **Network**: Scroll Sepolia Testnet
-- **Contract Address**: 0xDD279fA4138C7213Eb78ab12D04ddA16a9E8A0D4
-- **ScrollScan Link**: [Your ScrollScan Link]
+- **Contract Address**: 0x0EF565022d896A14f8D26110841D5da8d8b6A0FE
+- **ScrollScan Link**: https://sepolia.scrollscan.com/address/0x0EF565022d896A14f8D26110841D5da8d8b6A0FE
 
 ## 🧪 Testing
 
