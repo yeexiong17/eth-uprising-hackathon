@@ -1,4 +1,4 @@
-# 🐾 PawChain - Decentralized Pet Recovery System
+# 🐾 PawChain - Decentralized Pet Recovery System （Scroll down to the bottom to check out the links)
 
 ## Table of Contents
 - [Key Features](#-key-features)
@@ -249,6 +249,9 @@ For support, please join our [Discord Community](your-discord-link) or open a Gi
   - Network: Scroll Sepolia Testnet
   - Contract Address: 0x0EF565022d896A14f8D26110841D5da8d8b6A0FE
   - ScrollScan Link: https://sepolia.scrollscan.com/address/0x0EF565022d896A14f8D26110841D5da8d8b6A0FE
+  - Video Pitch: https://www.youtube.com/watch?v=iCUYbW3heZw 
 
 - **Subgraphs**
   - PawChain: https://api.studio.thegraph.com/query/105170/pawchain/version/latest
+  - Video Pitch: https://www.youtube.com/watch?v=iCUYbW3heZw 
+    
