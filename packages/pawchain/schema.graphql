@@ -101,13 +101,3 @@ type RewardDistributed @entity(immutable: true) {
   blockTimestamp: BigInt!
   transactionHash: Bytes!
 }
-
-type Transfer @entity(immutable: true) {
-  id: Bytes!
-  from: Bytes!
-  to: Bytes!
-  tokenId: BigInt!
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}

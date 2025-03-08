@@ -21,7 +21,6 @@ dataSources:
         - PetSighted
         - PetVerified
         - RewardDistributed
-        - Transfer
       abis:
         - name: YourContract
           file: ./abis/YourContract.json
@@ -36,6 +35,4 @@ dataSources:
           handler: handlePetVerified
         - event: RewardDistributed(indexed uint256,uint256)
           handler: handleRewardDistributed
-        - event: Transfer(indexed address,indexed address,indexed uint256)
-          handler: handleTransfer
       file: ./src/your-contract.ts

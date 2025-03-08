@@ -5,7 +5,6 @@ import {
   PetVerified as PetVerifiedEvent,
   RewardDistributed as RewardDistributedEvent,
   YourContract,
-  Transfer as TransferEvent
 } from "../generated/YourContract/YourContract"
 import {
   Pet,
@@ -166,13 +165,4 @@ export function handleRewardDistributed(event: RewardDistributedEvent): void {
   distribution.recipients = recipients
 
   distribution.save()
-}
-
-export function handleTransfer(event: TransferEvent): void {
-  let pet = Pet.load(event.params.tokenId.toString())
-  if (pet) {
-    pet.owner = event.params.to
-    pet.updatedAt = event.block.timestamp
-    pet.save()
-  }
 }
