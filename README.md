@@ -64,7 +64,6 @@ PawChain leverages The Graph's subgraphs for efficient data indexing and retriev
   - Next.js
   - RainbowKit
   - Wagmi
-  - Apollo Client (for GraphQL queries)
 
 - **Backend & Data**:
   - The Graph Protocol
@@ -80,8 +79,6 @@ PawChain leverages The Graph's subgraphs for efficient data indexing and retriev
 
 - **Tools**: 
   - TypeScript
-  - Viem
-  - Graph CLI
 
 ## 📦 Prerequisites
 
